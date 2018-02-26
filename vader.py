@@ -246,7 +246,7 @@ class vader:
 		
 		# define the main form - super parent
 		self.form = Tkinter.Tk()
-		self.form.wm_title(' Empire RESTful API GUI ')
+		self.form.wm_title(' Vader - Tkinter Front-End to Empire RESTful API ')
 		self.form.resizable(0,0)
 		
 		

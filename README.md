@@ -1,7 +1,7 @@
 # vader
 Python Tkinter Front-End for the Empire RESTful API
 
-Built on Kali GNU/Linux Rolling 2017.3 with Python 2.7.13.
+Built on Kali GNU/Linux Rolling 2018.1 with Python 2.7.14+.
 
 Support for Empire RESTful API version 2.4.
 

@@ -16,7 +16,7 @@ class empire_api_core:
 		self.api_host = ""
 		self.api_port = ""
 		self.api_version = ""
-		self.api_url_holder = []
+		self.api_url_holder = ""
 		
 		# tracks the authentication status of object/instance
 		self.object_authentication_status = False

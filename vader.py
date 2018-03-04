@@ -1,14 +1,17 @@
+# badhackjob, blog.cyberdecode.com
+# vader.py - Tkinter Frontend for Empire Project
+# v1.0.3.2018
+
 import Tkinter
 from Tkinter import *
 import ttk
 import tkFont
 from ScrolledText import ScrolledText
 from empire_api_core import empire_api_core
-from datetime import datetime
-import tkFileDialog
+from Queue import Queue
+from threading import Thread
 import tkMessageBox
-from tkMessageBox import *
-import os
+import time
 import ast
 from ast import *
 import urllib3
@@ -21,16 +24,16 @@ class api_task_all_agents_run_shell_popup:
 	
 		top = self.top = Tkinter.Toplevel(parent)
 		
-		self.task_all_agents_shell_popup_label = ttk.Label(self.top, text = "Shell Command: ")
+		self.task_all_agents_shell_popup_label = Tkinter.Label(self.top, text = "Shell Command: ")
 		self.task_all_agents_shell_popup_label.grid(row=0,column=0,sticky=W,padx=10,pady=10)
 		
 		self.task_all_agents_shell_entry = Tkinter.Entry(self.top,width=40)
 		self.task_all_agents_shell_entry.grid(row=0,column=1,sticky=NW,padx=5,pady=5,columnspan=15)
 		
-		self.task_all_agents_shell_action_button = ttk.Button(self.top,text = "Send Command",command=self.send)
+		self.task_all_agents_shell_action_button = Tkinter.Button(self.top,text = "Send Command",command=self.send)
 		self.task_all_agents_shell_action_button.grid(row=1,column=1,sticky=NW,padx=10,pady=10)
 		
-		self.task_all_agents_shell_cancel_button = ttk.Button(self.top,text = "Cancel", command = self.top.destroy)
+		self.task_all_agents_shell_cancel_button = Tkinter.Button(self.top,text = "Cancel", command = self.top.destroy)
 		self.task_all_agents_shell_cancel_button.grid(row=1,column=2,sticky=NW,padx=10,pady=10)
 	
 	def send(self):
@@ -38,56 +41,6 @@ class api_task_all_agents_run_shell_popup:
 		self.command = self.task_all_agents_shell_entry.get()
 		self.top.destroy()
 		
-# delete all agent results class POPUP
-class api_delete_all_agent_results_popup:
-	
-	def __init__(self,parent):
-		
-		# define the delete all agent results check boolean
-		self.delete_all_results = False
-		
-		# define the popup window
-		top = self.top = Tkinter.Toplevel(parent)
-		
-		self.delete_all_agent_results_label = ttk.Label(self.top, text = "CAUTION: Are you sure you would like to Delete All Agent Results?")
-		self.delete_all_agent_results_label.grid(row=0,column=0,sticky=W,padx=10,pady=10,columnspan=10)
-		
-		self.delete_all_agent_results_action_button = ttk.Button(self.top,text = "Delete All Agent Results",command=self.send)
-		self.delete_all_agent_results_action_button.grid(row=1,column=0,sticky=NSEW,padx=10,pady=10)
-		
-		self.delete_all_agent_results__cancel_button = ttk.Button(self.top,text = "Cancel", command = self.top.destroy)
-		self.delete_all_agent_results__cancel_button.grid(row=1,column=1,sticky=NSEW,padx=10,pady=10)
-		
-	def send(self):
-		
-		self.delete_all_results = True
-		self.top.destroy()
-
-# clear queued taskings for the agent POPUP
-class api_clear_que_task_popup:
-	
-	def __init__(self,parent,agent_name):
-		
-		# define the remove_agent check boolean
-		self.clear_que_results = False
-		
-		# define the popup window
-		top = self.top = Tkinter.Toplevel(parent)
-		
-		self.clear_que_task_label = ttk.Label(self.top, text = "CAUTION: Are you sure you would like to Clear Queued Taskings for " + agent_name + "?")
-		self.clear_que_task_label.grid(row=0,column=0,sticky=W,padx=10,pady=10,columnspan=10)
-		
-		self.clear_que_task_action_button = ttk.Button(self.top,text = "Clear Queued Tasks",command=self.send)
-		self.clear_que_task_action_button.grid(row=1,column=0,sticky=NSEW,padx=10,pady=10)
-		
-		self.clear_que_task__cancel_button = ttk.Button(self.top,text = "Cancel", command = self.top.destroy)
-		self.clear_que_task__cancel_button.grid(row=1,column=1,sticky=NSEW,padx=10,pady=10)
-		
-	def send(self):
-		
-		self.clear_que_results = True
-		self.top.destroy()
-	
 # rename agent class POPUP
 class api_rename_agent_popup:
 	
@@ -95,16 +48,16 @@ class api_rename_agent_popup:
 	
 		top = self.top = Tkinter.Toplevel(parent)
 		
-		self.rename_agent_label = ttk.Label(self.top, text = "New Agent Name: ")
+		self.rename_agent_label = Tkinter.Label(self.top, text = "New Agent Name: ")
 		self.rename_agent_label.grid(row=0,column=0,sticky=W,padx=10,pady=10)
 		
 		self.rename_agent_entry = Tkinter.Entry(self.top,width=40)
 		self.rename_agent_entry.grid(row=0,column=1,sticky=NW,padx=5,pady=5,columnspan=15)
 		
-		self.rename_agent_action_button = ttk.Button(self.top,text = "Rename Agent",command=self.send)
+		self.rename_agent_action_button = Tkinter.Button(self.top,text = "Rename Agent",command=self.send)
 		self.rename_agent_action_button.grid(row=1,column=1,sticky=NW,padx=10,pady=10)
 		
-		self.rename_agent_cancel_button = ttk.Button(self.top,text = "Cancel", command = self.top.destroy)
+		self.rename_agent_cancel_button = Tkinter.Button(self.top,text = "Cancel", command = self.top.destroy)
 		self.rename_agent_cancel_button.grid(row=1,column=2,sticky=NW,padx=10,pady=10)
 	
 	def send(self):
@@ -222,7 +175,6 @@ class credentials_event_details_window:
 class vader:
 	
 	###### CONSTRUCTOR #####
-	
 	def __init__(self):
 		
 		# empire api core object
@@ -244,16 +196,19 @@ class vader:
 		# selected module name for option execution
 		self.selected_module_name = ""
 		
+		# define the API Logging Queue
+		self.api_log_queue = Queue(maxsize=0)
+		
 		# define the main form - super parent
 		self.form = Tkinter.Tk()
-		self.form.wm_title(' Vader - Tkinter Front-End to Empire RESTful API ')
+		self.form.wm_title(' Vader.py - v1.0.3.2018 ')
 		self.form.resizable(0,0)
 		
 		
 		###### ACTION TABS FRAME #######
 		
 		# application tabs notebook, child to the form, parent to the tabs
-		self.nb = ttk.Notebook(self.form,height=475,width=1300)
+		self.nb = ttk.Notebook(self.form,height=500,width=1300)
 		self.nb.pack(fill=BOTH, expand=True)
 		self.nb.pressed_index = None
 		
@@ -284,12 +239,11 @@ class vader:
 		self.nb.add(self.modules_api,text='     Modules     ',state="disabled")
 		self.nb.add(self.creds_api,text='     Credentials     ',state="disabled")
 		self.nb.add(self.report_api,text='     Reporting     ',state="disabled")
-		
-		# Build the terminal window
-		#self.termf = Tkinter.Frame(self.form,height=250)
-		#self.termf.pack(fill=BOTH,expand=YES,padx=5)
-		#self.termf_wid = self.termf.winfo_id()
-		#os.system('xterm -into %d -geometry 250x15 -fa Monospace -sb -fs 11 -bg black -fg white &' % self.termf_wid)
+				
+		######### API LOG FRAME #################
+		self.api_log_textbox = ScrolledText(self.form,height=12)
+		self.api_log_textbox.config(bg='black',fg='white',state="disabled")
+		self.api_log_textbox.pack(fill=BOTH,expand=YES,padx=5)
 							
 		######### BUILD APPLICATION ###########
 		self.build_api_admin_tab()
@@ -310,7 +264,7 @@ class vader:
 	
 		##### AUTHENTICATION INFO FRAME ##############
 		# authentication input fields
-		self.api_connection_lframe = Tkinter.LabelFrame(self.admin_api, text=" API Authentication: ")
+		self.api_connection_lframe = Tkinter.LabelFrame(self.admin_api)
 		self.api_connection_lframe.grid(row=0,column=0,padx=10,pady=5,sticky=NW)
 		
 		# ------- Username Entry Field ------------ #
@@ -380,39 +334,39 @@ class vader:
 		# ------- Port Entry Field ------------ #
 		
 		# Get Session Token
-		self.api_action_get_session_button = Tkinter.Button(self.api_connection_lframe,text="Session Token",command=self.api_get_session)
+		self.api_action_get_session_button = Tkinter.Button(self.api_connection_lframe,text="Access the Empire",command=self.api_get_session)
 		self.api_action_get_session_button.config(fg='white',bg='blue',font=('arial','10','bold'))
 		self.api_action_get_session_button.grid(row=3,column=2,sticky=W,padx=5,pady=5)
 				
 		##### CONNECTION INFO FRAME ##############
 		
 		##### API ACTION FRAME ##############
-		self.api_action_lframe = Tkinter.LabelFrame(self.admin_api, text=" API Actions: ")
+		self.api_action_lframe = Tkinter.LabelFrame(self.admin_api)
 		self.api_action_lframe.grid(row=0,column=1,padx=10,pady=5,sticky=NW,rowspan=2)
 		
 		# Get Permanent Session Token
-		self.api_action_get_perm_session_button = Tkinter.Button(self.api_action_lframe,text="Permanent Session Token",command=self.api_get_perm_session)
-		self.api_action_get_perm_session_button.config(state="disabled",fg='white',bg='green',font=('arial','10','bold'))
+		self.api_action_get_perm_session_button = Tkinter.Button(self.api_action_lframe,text="Get Permanent Token",command=self.api_get_perm_session)
+		self.api_action_get_perm_session_button.config(state="disabled",fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.api_action_get_perm_session_button.grid(row=1,column=0,sticky=W,padx=5,pady=5)
 		
 		# Restart RESTful API Server
 		self.api_action_restart_api_button = Tkinter.Button(self.api_action_lframe,text="Restart API Server",command=self.api_restart_api_server)
-		self.api_action_restart_api_button.config(state="disabled",fg='white',bg='red',font=('arial','10','bold'))
+		self.api_action_restart_api_button.config(state="disabled",fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.api_action_restart_api_button.grid(row=2,column=0,sticky=W,padx=5,pady=5)
 		
 		# Shutdown RESTful API Server
 		self.api_action_shutdown_api_button = Tkinter.Button(self.api_action_lframe,text="Shutdown API Server",command=self.api_shutdown_api_server)
-		self.api_action_shutdown_api_button.config(state="disabled",fg='white',bg='red',font=('arial','10','bold'))
+		self.api_action_shutdown_api_button.config(state="disabled",fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.api_action_shutdown_api_button.grid(row=3,column=0,sticky=W,padx=5,pady=5)
 		
 		##### API ACTION FRAME ##############
 
 		######## API CONFIG INFO FRAME #############
-		self.api_config_lframe = Tkinter.LabelFrame(self.admin_api, text=" API Configuration: ")
+		self.api_config_lframe = Tkinter.LabelFrame(self.admin_api)
 		self.api_config_lframe.grid(row=1,column=0,columnspan=2,padx=10,pady=5,sticky=NW)
 		
 		self.api_config_textbox = ScrolledText(self.api_config_lframe,width=75,height=12)
-		self.api_config_textbox.config(bg='ivory',state="disabled")
+		self.api_config_textbox.config(bg='ghost white',state="disabled")
 		self.api_config_textbox.grid(row=0,column=0,sticky='W',columnspan=2)
 		
 		# ------- Request Session Tokem ------------ #
@@ -438,7 +392,7 @@ class vader:
 	
 		##### LISTENER TYPE SELECTION FRAME ##############
 		
-		self.listener_options_lframe = Tkinter.Frame(self.listeners_api)
+		self.listener_options_lframe = Tkinter.LabelFrame(self.listeners_api)
 		self.listener_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 		
 		# LISTENER TYPES LISTBOX
@@ -460,7 +414,7 @@ class vader:
 		self.listener_type_treeview.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
 		
 		###### List ALL LISTENERS ############
-		self.listener_all_treeview = ttk.Treeview(self.listener_options_lframe,height=10)
+		self.listener_all_treeview = ttk.Treeview(self.listener_options_lframe,height=7)
 		self.listener_all_treeview.heading("#0",text="     Current Listeners:     ")
 		self.listener_all_treeview.column("#0",minwidth="0",width="250")
 		
@@ -471,7 +425,7 @@ class vader:
 		
 		# ---------- Refresh Button----------#
 		self.listener_refresh_button = Tkinter.Button(self.listener_options_lframe,text="  Refresh List  ",command=self.api_get_current_listeners)
-		self.listener_refresh_button.config(state="normal",fg='white',bg='green',font=('arial','10','bold'))
+		self.listener_refresh_button.config(state="normal",fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.listener_refresh_button.grid(row=3,column=0,sticky=N,padx=5,pady=5)
 		
 		###### LISTENER OPTIONS ENTRY FRAME - DYNAMIC ############
@@ -491,7 +445,7 @@ class vader:
 	
 		##### STAGERS TYPE SELECTION FRAME ##############
 		
-		self.stagers_options_lframe = Tkinter.Frame(self.stagers_api)
+		self.stagers_options_lframe = Tkinter.LabelFrame(self.stagers_api)
 		self.stagers_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 	
 		###### List ALL STAGERS ############
@@ -524,7 +478,7 @@ class vader:
 		self.agents_current_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 		
 		###### List CURRENT AGENTS ############
-		self.agents_current_treeview = ttk.Treeview(self.agents_current_options_lframe,height=10)
+		self.agents_current_treeview = ttk.Treeview(self.agents_current_options_lframe,height=8)
 		self.agents_current_treeview.heading("#0",text="     Current Agents:     ")
 		
 		# Bind to Action and Grid
@@ -533,7 +487,7 @@ class vader:
 		
 		# ---------- Refresh Current Agents----------#
 		self.agents_current_refresh_button = Tkinter.Button(self.agents_current_options_lframe,text="  Refresh List  ",command=self.api_get_current_agents)
-		self.agents_current_refresh_button.config(fg='white',bg='green',font=('arial','10','bold'))
+		self.agents_current_refresh_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.agents_current_refresh_button.grid(row=1,column=0,sticky=N,padx=5,pady=5)
 		
 		###### List STALE AGENTS ############
@@ -543,7 +497,7 @@ class vader:
 		
 		# ---------- Remove Stale Agents----------#
 		self.agents_stale_remove_button = Tkinter.Button(self.agents_current_options_lframe,text="  Remove Stale Agents  ",command=self.api_get_remove_stale_agents)
-		self.agents_stale_remove_button.config(fg='white',bg='red',font=('arial','10','bold'))
+		self.agents_stale_remove_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.agents_stale_remove_button.grid(row=4,column=0,sticky=N,padx=5,pady=5)
 		
 		###### AGENTS INFO / ACTION FRAME - DYNAMIC ############
@@ -559,27 +513,27 @@ class vader:
 		self.modules_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW,rowspan=2)
 	
 		###### List ALL modules ############
-		self.modules_all_treeview = ttk.Treeview(self.modules_options_lframe,height=18)
+		self.modules_all_treeview = ttk.Treeview(self.modules_options_lframe,height=20)
 		self.modules_all_treeview.heading("#0",text="     Modules:     ")
 		self.modules_all_treeview.column("#0",minwidth="0",width="540")
 
 		# Bind to Action
 		self.modules_all_treeview.bind("<Double-1>", self.api_get_module_by_name)
-		self.modules_all_treeview.grid(row=0,column=0,sticky=NW,padx=5,pady=5,rowspan=2,columnspan=3)
-		
-		# view all modules button
-		self.modules_view_all_button = Tkinter.Button(self.modules_options_lframe,text="View All Modules",command=self.api_get_current_modules)
-		self.modules_view_all_button.grid(row=2,column=0,sticky=W,padx=5,pady=5)
+		self.modules_all_treeview.grid(row=0,column=0,sticky=NW,padx=5,pady=5,rowspan=2,columnspan=10)
 		
 		# search entry and search button
 		self.modules_search_str = Tkinter.StringVar()
 		self.modules_search_field = Tkinter.Entry(self.modules_options_lframe,textvariable=self.modules_search_str,width=25)
-		self.modules_search_field.grid(row=2,column=1,sticky=W,padx=5,pady=5) 
+		self.modules_search_field.grid(row=2,column=0,sticky=W,padx=5,pady=5) 
 		
 		self.modules_search_button = Tkinter.Button(self.modules_options_lframe,text="Search Modules",command=self.api_search_for_module)
-		self.modules_search_button.config(fg='white',bg='green',font=('arial','10','bold'))
-		self.modules_search_button.grid(row=2,column=2,sticky=W,padx=5,pady=5)
+		self.modules_search_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
+		self.modules_search_button.grid(row=2,column=1,sticky=W,padx=5,pady=5)
 		
+		# view all modules button
+		self.modules_view_all_button = Tkinter.Button(self.modules_options_lframe,text="View All",command=self.api_get_current_modules)
+		self.modules_view_all_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
+		self.modules_view_all_button.grid(row=2,column=2,sticky=W,padx=5,pady=5)
 		
 		###### modules OPTIONS ENTRY FRAME - DYNAMIC ############
 		
@@ -594,7 +548,6 @@ class vader:
 		self.modules_api_canvas.pack(side=LEFT, fill=BOTH, expand=True)
 		self.modules_api_scroll.pack(side=RIGHT, fill=Y)
 		
-		
 	# REPORTING tab
 	def build_reporting_tab(self):
 			
@@ -608,7 +561,7 @@ class vader:
 		
 		##### REPORTING MAIN FRAME ##############
 		
-		self.reporting_main_lframe = Tkinter.LabelFrame(self.report_api,text="      Reporting Options:      ")
+		self.reporting_main_lframe = Tkinter.LabelFrame(self.report_api)
 		self.reporting_main_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 		
 		# Reporting Type Radio Button
@@ -619,7 +572,6 @@ class vader:
 		reporting_type_all_events = Radiobutton(self.reporting_main_lframe,text="Get All Logged Events",variable=self.reporting_type_int,value=1)
 		reporting_type_all_events.config(command=self.misc_reporting_type_option_select)
 		reporting_type_all_events.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
-		
 		
 		# 2. agent events
 		reporting_type_agent_events = Radiobutton(self.reporting_main_lframe,text="Get Agent Logged Events",variable=self.reporting_type_int,value=2)
@@ -636,8 +588,7 @@ class vader:
 		self.reporting_agent_option_menu = Tkinter.OptionMenu(self.reporting_main_lframe,self.reporting_agent_field_str,*holder,command=self.misc_set_reporting_agent_field_str)
 		self.reporting_agent_option_menu.grid(row=1,column=1,sticky=NW,padx=5,pady=5)
 		self.reporting_agent_option_menu.config(state="disabled")
-		
-		
+	
 		# 3. specific type events
 		reporting_type_specifictype = Radiobutton(self.reporting_main_lframe,text="Get Logged Events of Specific Type",variable=self.reporting_type_int,value=3)
 		reporting_type_specifictype.config(command=self.misc_reporting_type_option_select)
@@ -652,7 +603,6 @@ class vader:
 		self.reporting_type_option_menu.grid(row=2,column=1,sticky=NW,padx=5,pady=5)
 		self.reporting_type_option_menu.config(state="disabled")
 		
-		
 		# 4. specific msg events
 		reporting_type_specificmsg = Radiobutton(self.reporting_main_lframe,text="Get Logged Events w/ Specific Msg",variable=self.reporting_type_int,value=4)
 		reporting_type_specificmsg.config(command=self.misc_reporting_type_option_select)
@@ -665,19 +615,15 @@ class vader:
 		self.reporting_type_specificmsg_entry.grid(row=3,column=1,sticky=NW,padx=5,pady=5) 
 		self.reporting_type_specificmsg_entry.config(state="disabled")
 		
-		
 		#### INFO LABEL ######
 		reporting_info_label = Tkinter.StringVar()	
-		reporting_info_label.set("*  Use the Refresh button to update the Agent option menu.") 
+		reporting_info_label.set("*  Use the Refresh Agents button to update the Agent option menu.") 
 		reporting_info_dlabel = Tkinter.Label(self.report_api,textvariable=reporting_info_label)
 		reporting_info_dlabel.grid(row=1,column=0,padx=5,pady=5,sticky='nw')
 		
-		
 		######### ACTIONS Main FRAME ##############
-		
-		reporting_actions_lframe = Tkinter.LabelFrame(self.report_api,text="      Reporting Actions:      ")
+		reporting_actions_lframe = Tkinter.LabelFrame(self.report_api)
 		reporting_actions_lframe.grid(row=2,column=0,padx=5,pady=5,sticky='nw')
-		
 		
 		# ---------- Request Events----------#
 		reporting_request_button = Tkinter.Button(reporting_actions_lframe,text="  Request Events  ",command=self.reporting_display_output)
@@ -686,19 +632,17 @@ class vader:
 		
 		# ---------- Refresh Events----------#
 		reporting_refresh_button = Tkinter.Button(reporting_actions_lframe,text="  Refresh Agents  ",command=self.misc_reporting_action_refresh)
-		reporting_refresh_button.config(fg='white',bg='green',font=('arial','10','bold'))
+		reporting_refresh_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 		reporting_refresh_button.grid(row=0,column=1,sticky=NW,padx=5,pady=5)
-    
-    
     
 		##### REPORTING OUTPUT ##############
 		
-		self.reporting_output_lframe = Tkinter.LabelFrame(self.report_api,text="      Reporting Output:      ")
+		self.reporting_output_lframe = Tkinter.LabelFrame(self.report_api)
 		self.reporting_output_lframe.grid(row=0,column=1,padx=5,pady=5,sticky='nw',rowspan=20)
 		
 		cols = [ "EventType", "TimeStamp", "TaskID", "AgentName", "Message", "ID" ]
 
-		self.reporting_tree = ttk.Treeview(self.reporting_output_lframe, columns=cols, show="headings",height="18")
+		self.reporting_tree = ttk.Treeview(self.reporting_output_lframe, columns=cols, show="headings",height="21")
 		self.reporting_tree.bind("<Double-1>", self.misc_reporting_display_event_details)
 		
 		for c in cols:
@@ -711,12 +655,12 @@ class vader:
 	def build_credentials_tab(self):
 		
 		# creds main frame
-		self.creds_output_lframe = Tkinter.LabelFrame(self.creds_api,text = "       Credentials Store     ")
+		self.creds_output_lframe = Tkinter.LabelFrame(self.creds_api)
 		self.creds_output_lframe.grid(row=0,column=0,padx=10,pady=10,sticky=NW)
 		
 		# refresh button
 		self.creds_refresh_button = Button(self.creds_output_lframe,text="Refresh Creds",command=self.api_get_stored_credentials)
-		self.creds_refresh_button.config(fg='white',bg='green',font=('arial','10','bold'))
+		self.creds_refresh_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.creds_refresh_button.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 		
 		# label info
@@ -726,7 +670,7 @@ class vader:
 		# build creds treeview
 		cols = [ "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
 		
-		self.creds_tree = ttk.Treeview(self.creds_output_lframe, columns=cols, show="headings",height="15")
+		self.creds_tree = ttk.Treeview(self.creds_output_lframe, columns=cols, show="headings",height="18")
 		self.creds_tree.bind("<Double-1>", self.misc_creds_display_event_details)
 		
 		for c in cols:
@@ -745,6 +689,7 @@ class vader:
 			
 			# get session token request successful (True)
 			response = self.eac_object.admin_get_session_token()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# authentication successful
 			if response == True:
@@ -755,6 +700,7 @@ class vader:
 				# get the api server configuration
 				try:
 					response = self.eac_object.api_config_info()
+					self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 					
 					# clear the config textarea
 					self.api_config_textbox.config(state="normal")
@@ -805,7 +751,18 @@ class vader:
 					
 				except Exception as e:
 					tkMessageBox.showerror("ERROR","Error enabling additional application tabs and function calls: " + str(e))
-						
+				
+				
+				# start the API Logging Threads
+				self.api_log_update_thread = Thread(target=self.api_thread_update_queue,args=(self.api_log_queue,))
+				self.api_log_update_thread.setDaemon(True)
+				self.api_log_update_thread.start()
+				
+				self.api_log_display_thread = Thread(target=self.api_thread_display_queue)
+				self.api_log_display_thread.setDaemon(True)
+				self.api_log_display_thread.start()
+				
+				
 			else:
 				tkMessageBox.showerror("ERROR","Unable to retrieve Session Token with provided authentication info:" + response)
 				
@@ -818,6 +775,9 @@ class vader:
 			# set the request token field
 			self.api_request_token_str.set(self.eac_object.api_request_token)
 		
+		# log the request
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
+		
 	# restart the api server
 	def api_restart_api_server(self):
 	
@@ -825,6 +785,7 @@ class vader:
 	
 			# restart api server call
 			response = self.eac_object.admin_restart_restful_api_server()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 
 			# restart success
 			if response['success']:	
@@ -839,6 +800,7 @@ class vader:
 		
 			# shutdown api server call
 			response = self.eac_object.admin_shutdown_restful_api_server()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 
 			try:
 				# shutdown success
@@ -888,14 +850,14 @@ class vader:
 			self.selected_listener = self.listener_all_treeview.selection()[0]
 			listener_name =  str(self.listener_all_treeview.item(self.selected_listener,"text"))
 			
-		except:
-			
-			tkMessageBox.showerror("ERROR","An error has occurred defining selected listener.")
+		except Exception as e:
+			tkMessageBox.showerror("ERROR","An error has occurred defining selected listener - "  + str(e))
 			
 			return
 			
 		# call to the api with listener name
 		response = self.eac_object.listeners_get_listener_by_name(listener_name)
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 		# parsing was successful
 		try:
@@ -907,25 +869,22 @@ class vader:
 			except:
 				pass
 			
-			
 			# build temporary frame
 			# define the temp labelframe
-			self.temp_labelframe = Tkinter.LabelFrame(self.listeners_api_canvas,text="Listener Options for: " + listener_name)
+			self.temp_labelframe = Tkinter.LabelFrame(self.listeners_api_canvas)
 			self.listeners_api_canvas.create_window(0,10,window=self.temp_labelframe,anchor=NW)
 					
 			# display the kill listener and kill all listeners buttons
 			# ---------- Kill Listener Button----------#
 			listener_kill_button = Tkinter.Button(self.temp_labelframe,text="Kill Listener",command=self.api_delete_kill_listener)
-			listener_kill_button.config(fg='white',bg='red',font=('arial','10','bold'))
+			listener_kill_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 			listener_kill_button.grid(row=0,column=1,sticky=NW,padx=2,pady=2)
 			
-		
 			# ---------- Kill All Listener Button----------#
 			listener_kill_all_button = Tkinter.Button(self.temp_labelframe,text="Kill All Listeners",command=self.api_delete_kill_all_listeners)
-			listener_kill_all_button.config(fg='white',bg='red',font=('arial','10','bold'))
+			listener_kill_all_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 			listener_kill_all_button.grid(row=0,column=2,sticky=NW,padx=2,pady=2)
 		
-			
 			# track the row count for placement
 			row_count = 1
 						
@@ -951,14 +910,13 @@ class vader:
 						# Option Field Value
 						self.option_field_str = Tkinter.StringVar()
 						self.option_field_str.set(value)
-						self.option_entry_field = Tkinter.Entry(self.temp_labelframe,textvariable=self.option_field_str,width=30)
-						self.option_entry_field.config(state="disabled",disabledbackground='ivory',disabledforeground='black')
+						self.option_entry_field = Tkinter.Entry(self.temp_labelframe,textvariable=self.option_field_str,width=40)
+						self.option_entry_field.config(state="disabled",disabledbackground='ghost white',disabledforeground='black')
 						self.option_entry_field.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 						
 						# increment the row count
 						row_count += 1
 					
-						
 					# check if options key
 					# iterate thru dictionaries in options value
 					# style fields based on requirements	
@@ -985,24 +943,21 @@ class vader:
 							# Option Field
 							self.option_field_str = Tkinter.StringVar()
 							self.option_field_str.set(str(value_str))
-							self.option_entry_field = Tkinter.Entry(self.temp_labelframe,textvariable=self.option_field_str,width=30)
-							self.option_entry_field.config(state="disabled",disabledbackground='ivory',disabledforeground='black')
+							self.option_entry_field = Tkinter.Entry(self.temp_labelframe,textvariable=self.option_field_str,width=40)
+							self.option_entry_field.config(state="disabled",disabledbackground='ghost white',disabledforeground='black')
 							self.option_entry_field.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 							
 							# Option Description
 							self.option_description_str = Tkinter.StringVar()
 							self.option_description_str.set(str(description_str))
-							self.option_description_dlabel = Tkinter.Label(self.temp_labelframe,textvariable=self.option_description_str,wraplength=400,justify=LEFT)
+							self.option_description_dlabel = Tkinter.Label(self.temp_labelframe,textvariable=self.option_description_str,wraplength=500,justify=LEFT)
 							self.option_description_dlabel.grid(row=row_count,column=3,sticky=W,padx=2,pady=2)
 							
 							# increment the row count
-							row_count += 1
-			
+							row_count += 1			
 		
-			
 		# parsing json failed
 		except Exception as e:
-			
 			tkMessageBox.showerror("ERROR","Error parsing Get Listener by Name - " + str(e))
 						
 	# get current listeners
@@ -1010,6 +965,7 @@ class vader:
 		
 		# Get All current Listeners
 		response = self.eac_object.listeners_get_current_listeners()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		# temp list of listener names
 		holder = []
@@ -1043,6 +999,7 @@ class vader:
 		
 		# call to api function with selected listener type, return json
 		response = self.eac_object.listeners_get_current_listener_options(str(self.listener_type_treeview.item(self.selected_item,"text")))
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 		# parsing was successful
 		try:
@@ -1056,7 +1013,7 @@ class vader:
 
 			
 			# define the temp labelframe
-			self.temp_labelframe = Tkinter.LabelFrame(self.listeners_api_canvas,text="     " + str(self.listener_type_treeview.item(self.selected_item,"text")) + " Listener Options:       ")
+			self.temp_labelframe = Tkinter.LabelFrame(self.listeners_api_canvas)
 			self.listeners_api_canvas.create_window(0,10,window=self.temp_labelframe,anchor=NW)
 						
 			# ---------- Create Button----------#
@@ -1109,18 +1066,18 @@ class vader:
 					temp_field_str = Tkinter.StringVar()
 					temp_field_str.set(str(val))
 					
-					option_field = Tkinter.Entry(self.temp_labelframe,textvariable=temp_field_str,width=30)
+					option_field = Tkinter.Entry(self.temp_labelframe,textvariable=temp_field_str,width=40)
 					option_field.grid(row=row_count,column=1,sticky=W,padx=2,pady=2)
 					option_field.config(background="wheat") 
 					
 				else:
 					temp_field_str = Tkinter.StringVar()
 					temp_field_str.set(str(val))
-					entry_field = Tkinter.Entry(self.temp_labelframe,textvariable=temp_field_str,width=30)
+					entry_field = Tkinter.Entry(self.temp_labelframe,textvariable=temp_field_str,width=40)
 					entry_field.grid(row=row_count,column=1,sticky=W,padx=2,pady=2) 
 	 				 			
 				# Option Description
-				description_label = Tkinter.Label(self.temp_labelframe,text=str(description_str),wraplength=400,justify=LEFT)
+				description_label = Tkinter.Label(self.temp_labelframe,text=str(description_str),wraplength=500,justify=LEFT)
 				description_label.grid(row=row_count,column=2,sticky=W,padx=2,pady=2)
 	
 				
@@ -1131,7 +1088,7 @@ class vader:
 		# parsing json failed
 		except Exception as e:
 			
-			print "ERROR: Get Listener Type parse failed - " + str(e) + ": " + str(response),str(datetime.now())
+			tkMessageBox.showerror("ERROR","Get Listener Type parse failed - " + str(e))
 			
 	# create new listener
 	def api_post_create_listener(self):
@@ -1158,7 +1115,7 @@ class vader:
 		# grabbing child item values failed				
 		except Exception as e:
 			
-			print "ERROR: Grabbing child items failed on Create Listener - " + str(e) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Grabbing child items failed on Create Listener - " + str(e))
 			return
 		
 		# check if value list is same size as temp keys list for listener type selected
@@ -1189,6 +1146,7 @@ class vader:
 
 			# -- Send the Create Listener Command --- #
 			self.eac_object.listeners_create_listener(temp_dict,str(self.listener_type_treeview.item(self.selected_item,"text")))
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# Refresh the current listeners list
 			self.api_get_current_listeners()
@@ -1204,6 +1162,7 @@ class vader:
 			
 			# call to the api with listener name
 			response = self.eac_object.listeners_kill_listener(listener_name)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			try:
 			
@@ -1232,6 +1191,7 @@ class vader:
 		
 			# call to the api 
 			response = self.eac_object.listeners_kill_all_listeners()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			try:
 			
@@ -1259,6 +1219,7 @@ class vader:
 	
 		# call to api function
 		response = self.eac_object.stagers_get_current_stagers()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		try:
 			
@@ -1298,6 +1259,7 @@ class vader:
 				
 		# call to the api with stager name
 		response = self.eac_object.stagers_get_stager_by_name(stager_name)
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 	
 		try:
 			
@@ -1314,11 +1276,11 @@ class vader:
 			self.stagers_api_canvas.create_window(0,10,window=self.temp_stagers_dynamic_coreframe,anchor=NW)
 			
 			# build details temporary frame
-			self.temp_stagers_details_labelframe = Tkinter.LabelFrame(self.temp_stagers_dynamic_coreframe,text="Stager Details for : " + str(stager_name) + "     ")
+			self.temp_stagers_details_labelframe = Tkinter.LabelFrame(self.temp_stagers_dynamic_coreframe)
 			self.temp_stagers_details_labelframe.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
 			
 			# build options temporary frame
-			self.temp_stagers_options_labelframe = Tkinter.LabelFrame(self.temp_stagers_dynamic_coreframe,text="Stager Options for : " + str(stager_name) + "     ")
+			self.temp_stagers_options_labelframe = Tkinter.LabelFrame(self.temp_stagers_dynamic_coreframe)
 			self.temp_stagers_options_labelframe.grid(row=1,column=0,sticky=NW,padx=2,pady=5)
 			
 			# ---------- Create Button----------#
@@ -1340,25 +1302,51 @@ class vader:
 				for key,value in item.iteritems():
 					
 					# regular key value print
-					if (key == "Name") or \
-					   (key == "Description"):
-						   
+					if (key == "Name"):
+						
 						# Option Name
-						name_label = Tkinter.Label(self.temp_stagers_details_labelframe,text=key + ": ",justify=LEFT)
-						name_label.grid(row=row_count,column=0,sticky=E,padx=2,pady=2)
-				
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_stagers_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=E,padx=2,pady=2)
+						
 						# Option Field Value
-						field_label = Tkinter.Label(self.temp_stagers_details_labelframe,text=str(value),wraplength=600,justify=LEFT)
-						field_label.grid(row=row_count,column=1,sticky=W,padx=2,pady=2)
-												
+						self.option_field_str = Tkinter.StringVar()
+						self.option_field_str.set(str(value))
+						self.option_entry_field = Tkinter.Entry(self.temp_stagers_details_labelframe,textvariable=self.option_field_str,width=70)
+						self.option_entry_field.config(state="disabled",disabledbackground="ghost white",disabledforeground="black")
+						self.option_entry_field.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
+						
 						# increment the row count
 						row_count += 1
 						
+					elif (key == "Description"):
+						
+						# Option Name
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_stagers_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=NE,padx=2,pady=2)
+						
+						# Option Field Value
+						self.option_entry_textbox = ScrolledText(self.temp_stagers_details_labelframe,width=80,height=2)
+						self.option_entry_textbox.config(bg="ghost white",state="disabled")
+						self.option_entry_textbox.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
+						
+						self.option_entry_textbox.config(state="normal")
+						self.option_entry_textbox.insert(Tkinter.END,str(value))
+						self.option_entry_textbox.config(state="disabled")
+												
+						# increment the row count
+						row_count += 1
+					
 					elif (key == "Author"):
 							 
 						# Option Name
-						name_label = Tkinter.Label(self.temp_stagers_details_labelframe,text=str(key) + ": ",justify=LEFT)
-						name_label.grid(row=row_count,column=0,sticky=E,padx=2,pady=2)
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_stagers_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=E,padx=2,pady=2)
 						
 						 # Option Field Value
 						authors = ""
@@ -1367,33 +1355,51 @@ class vader:
 						for i in value:
 							authors += str(i) + " "
 							
-						# grid the field dlablel
-						field_label = Tkinter.Label(self.temp_stagers_details_labelframe,text=authors,wraplength=600,justify=LEFT)
-						field_label.grid(row=row_count,column=1,sticky=W,padx=2,pady=2)
+						# Option Field Value
+						self.option_field_str = Tkinter.StringVar()
+						self.option_field_str.set(str(authors))
+						self.option_entry_field = Tkinter.Entry(self.temp_stagers_details_labelframe,textvariable=self.option_field_str,width=70)
+						self.option_entry_field.config(state="disabled",disabledbackground="ghost white",disabledforeground="black")
+						self.option_entry_field.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 						
 						# increment the row count
 						row_count += 1
 				
 					elif (key == "Comments"):
-							 
-						# Option Name
-						name_label = Tkinter.Label(self.temp_stagers_details_labelframe,text=str(key) + ": ",justify=LEFT)
-						name_label.grid(row=row_count,column=0,sticky=NE,padx=2,pady=2)
-												
-						# Option Field Value
-						comments = ""
+
+						# check if Comments blank - if so, skip
+						if ( len(value) == 1) and ( str(value[0]) == "" ):
+							continue
 						
-						# grab the list values
-						for i in value:
-							comments += str(i) + " "
-								
-						# grid the field dlablel								
-						field_label = Tkinter.Label(self.temp_stagers_details_labelframe,text=comments,wraplength=600,justify=LEFT)
-						field_label.grid(row=row_count,column=1,sticky=NW,padx=2,pady=2)
-						
-						# increment the row count
-						row_count += 1
-						
+						# Comment not blank, so display
+						else:
+							
+							# Option Name
+							self.option_name_str = Tkinter.StringVar()
+							self.option_name_str.set(str(key))
+							self.option_name_dlabel = Tkinter.Label(self.temp_stagers_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+							self.option_name_dlabel.grid(row=row_count,column=0,sticky=NE,padx=2,pady=2)
+													
+							# Option Field Value
+							comments = ""
+							
+							# grab the list values
+							for i in value:
+								comments += str(i) + " "
+									
+							# grid the field dlablel								
+							# Option Field Value
+							self.option_entry_textbox = ScrolledText(self.temp_stagers_details_labelframe,width=80,height=2)
+							self.option_entry_textbox.config(bg="ghost white",state="disabled")
+							self.option_entry_textbox.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
+							
+							self.option_entry_textbox.config(state="normal")
+							self.option_entry_textbox.insert(Tkinter.END,str(comments))
+							self.option_entry_textbox.config(state="disabled")
+							
+							# increment the row count
+							row_count += 1
+							
 					elif (key == "options"):
 						
 						# we have to do some digging here: value is a dictionary of dictionaries
@@ -1429,6 +1435,7 @@ class vader:
 									
 									# grid universal Listener drop down
 									response = self.eac_object.listeners_get_current_listeners()
+									self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 									
 									# list holding listener names, dropdown choices
 									choices = []
@@ -1443,8 +1450,8 @@ class vader:
 											for item in response['listeners']:
 												choices.append(str(item['name']))
 										
-										except:
-											print "ERROR: " + str(response) + str(datetime.now())
+										except Exception as e:
+											tkMessageBox.showerror("ERROR","Grab name for each Listener failed - " + str(e))
 									
 									# build the drop down menu
 									option_field = Tkinter.OptionMenu(self.temp_stagers_options_labelframe,self.option_listener_field_str,*choices,command=self.misc_set_listener_field_str)
@@ -1540,6 +1547,7 @@ class vader:
 			
 			# -- Send the Create Stagers Command --- #
 			response = self.eac_object.stagers_generate_stager(temp_dict)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 
 			# call stagers results window class, params: parent, json response, name of launcher, and stager outfile path
 			stager_results = stagers_results_window(self.form,response,str(temp_dict['StagerName']),self.stager_outfile_path)
@@ -1560,6 +1568,7 @@ class vader:
 		
 		# call to api function
 		response = self.eac_object.agents_get_current_agents()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		# JSON Parsing - response is a {'agents':[{dict1},{dict2},...]}
 		try:
@@ -1581,7 +1590,7 @@ class vader:
 		
 		# JSON Parsing Failed
 		except Exception as e:
-			print "ERROR: Get Current Agents failed." + str(e) + str(response) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Get Current Agents failed." + str(e))
 		
 		### UPDATE - makes the call to api_get_stale_agents too
 		self.api_get_stale_agents()
@@ -1591,6 +1600,7 @@ class vader:
 		
 		# call to api function
 		response = self.eac_object.reporting_get_all_logged_events()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		# JSON Parsing - response is a {'agents':[{dict1},{dict2},...]}
 		try:
@@ -1617,13 +1627,14 @@ class vader:
 
 		# JSON Parsing Failed
 		except Exception as e:
-			print "ERROR: Get Current Agents failed." + str(e) + str(response) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Get Current Agents failed." + str(e))
 		
 	# get stale agents
 	def api_get_stale_agents(self):
 		
 		# call to api function
 		response = self.eac_object.agents_get_stale_agents()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		# JSON Parsing - response is a {'agents':[{dict1},{dict2},...]}
 		try:
@@ -1645,13 +1656,14 @@ class vader:
 		
 		# JSON Parsing Failed
 		except Exception as e:
-			print "ERROR: Get Stale Agents failed." + str(e) + str(response) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Get Stale Agents failed." + str(e))
 		
 	# remove stale agents
 	def api_get_remove_stale_agents(self):
 		
 		# call to api function
 		self.eac_object.agents_remove_stale_agents()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		# clear the frame
 		try:
@@ -1677,6 +1689,7 @@ class vader:
 		
 		# call to the api with listener name
 		response = self.eac_object.agents_get_agent_by_name(self.selected_agent_name)
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 		# parsing was successful
 		try:
@@ -1689,7 +1702,7 @@ class vader:
 				pass
 			
 			# build temporary details frame
-			self.temp_agent_labelframe = Tkinter.LabelFrame(self.agent_info_action_lframe,text="Agent Info for " + self.selected_agent_name)
+			self.temp_agent_labelframe = Tkinter.LabelFrame(self.agent_info_action_lframe)
 			self.temp_agent_labelframe.grid(row=0,column=0,padx=2,pady=2,sticky=NW)
 			
 			# track the row count and column count for placement
@@ -1724,7 +1737,7 @@ class vader:
 						option_field_str = Tkinter.StringVar()
 						option_field_str.set(value)
 						option_entry_field = Tkinter.Entry(self.temp_agent_labelframe,textvariable=option_field_str,width=30)
-						option_entry_field.config(state="disabled",disabledbackground='ivory',disabledforeground='black')
+						option_entry_field.config(state="disabled",disabledbackground='ghost white',disabledforeground='black')
 						option_entry_field.grid(row=row_count,column=col_count,sticky=W,padx=2,pady=2)
 						
 						# increment the column count
@@ -1769,7 +1782,7 @@ class vader:
 			self.temp_agent_results_labelframe = Tkinter.Frame(self.agent_info_action_lframe)
 			self.temp_agent_results_labelframe.grid(row=1,column=0,padx=2,pady=2,sticky=NW)
 			
-			self.task_agent_shell_popup_label = ttk.Label(self.temp_agent_results_labelframe, text = "SHELL CMD: ")
+			self.task_agent_shell_popup_label = ttk.Label(self.temp_agent_results_labelframe, text = "POWERSHELL: ")
 			self.task_agent_shell_popup_label.grid(row=0,column=0,sticky=E,padx=5,pady=5)
 		
 			self.task_agent_shell_entry = Tkinter.Entry(self.temp_agent_results_labelframe,width=40)
@@ -1779,14 +1792,13 @@ class vader:
 			self.task_agent_shell_action_button.config(fg='white',bg='blue',font=('arial','10','bold'))
 			self.task_agent_shell_action_button.grid(row=0,column=3,sticky=W,padx=2,pady=2)
 			
-
 			self.temp_RefreshButton = Tkinter.Button(self.temp_agent_results_labelframe,text="Refresh Results",command= lambda: self.api_get_agent_results(self.selected_agent_name))
-			self.temp_RefreshButton.config(fg='white',bg='green',font=('arial','10','bold'))
+			self.temp_RefreshButton.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 			self.temp_RefreshButton.grid(row=0,column=4,sticky=W,padx=2,pady=2)
 		
-			self.temp_agents_results_scrolledtext = ScrolledText(self.temp_agent_results_labelframe,height=15,width=145)
-			self.temp_agents_results_scrolledtext.config(bg='ivory')
-			self.temp_agents_results_scrolledtext.grid(row=1,column=0,columnspan=15,sticky='NEWS',padx=2,pady=2)
+			self.temp_agents_results_scrolledtext = ScrolledText(self.temp_agent_results_labelframe,height=18,width=147)
+			self.temp_agents_results_scrolledtext.config(bg='ghost white')
+			self.temp_agents_results_scrolledtext.grid(row=1,column=0,columnspan=50,sticky='NEWS',padx=2,pady=2)
 			self.temp_agents_results_scrolledtext.config(state="disabled")
 			
 			# call to Agent Results to load display
@@ -1805,6 +1817,7 @@ class vader:
 			
 			# call to api function
 			response = self.eac_object.agents_remove_agent(self.selected_agent_name)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			try:
 				# removal was successful
@@ -1843,6 +1856,7 @@ class vader:
 				
 				# call to api function
 				self.eac_object.agents_task_agent_run_shell_cmd(self.selected_agent_name,command_data)
+				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# blank command value
 			else:
@@ -1868,10 +1882,11 @@ class vader:
 				
 				# call to api function
 				self.eac_object.agents_task_all_agents_run_shell_cmd(command_data)
+				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# blank command value
 			else:
-				print "ERROR: No Command entered to run on All Agents " + self.selected_agent_name + "." + str(datetime.now())
+				tkMessageBox.showerror("ERROR","No Command entered to run on All Agents.")
 
 		except:
 			pass
@@ -1883,6 +1898,7 @@ class vader:
 		 
 			# call to the api with listener name
 			response = self.eac_object.agents_get_agent_results(agent)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# set to writing
 			self.temp_agents_results_scrolledtext.config(state="normal")
@@ -1927,34 +1943,28 @@ class vader:
 			
 			# call to api function
 			self.eac_object.agents_delete_agent_results(agent)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 	# delete all agent results
 	def api_delete_all_agent_results(self):
 	
-		# create instance of remove agent results dialog window
-		delete_all_results_dialog = api_delete_all_agent_results_popup(self.form)
-		self.form.wait_window(delete_all_results_dialog.top)
-		
 		# check if delete all results boolean True, if so delete all results
-		if delete_all_results_dialog.delete_all_results:
+		if tkMessageBox.askyesno("Delete ALL Agent Results","Are you sure you want to delete ALL Agent results?"):
 			
 			# call to api function
 			self.eac_object.agents_delete_all_agent_results()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 						
 	# clear queued agent taskings
 	def api_clear_queued_agent_taskings(self):
 	
-		# create instance of clear queue dialog window
-		clear_que_dialog = api_clear_que_task_popup(self.form,self.selected_agent_name)
-		self.form.wait_window(clear_que_dialog.top)
-		
 		# check if remove_agent boolean True, if so remove agent
-		if clear_que_dialog.clear_que_results:
+		if tkMessageBox.askyesno("Clear Queued Agent Tasks","Are you sure you want to clear ALL queued tasks?"):
 			
 			# call to api function
 			self.eac_object.agents_clear_queued_agent_tasking(self.selected_agent_name)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
-
 	# rename agent
 	def api_rename_agent(self):
 		
@@ -1972,6 +1982,7 @@ class vader:
 				
 				# call to api function
 				response = self.eac_object.agents_rename_agent(self.selected_agent_name,newname_data)
+				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 				try:
 					
@@ -1989,16 +2000,16 @@ class vader:
 						
 					# rename failed
 					else:
-						print "ERROR: Rename Agent failed for " + self.selected_agent_name + ": " + str(response['success']) + str(datetime.now())
+						tkMessageBox.showerror("ERROR","Rename Agent failed for " + self.selected_agent_name)
 			
 				# request bombed
 				except Exception as e:
 				
-					print "ERROR: Rename Agent failed - " + str(e) + " : " + str(response) + str(datetime.now())
+					tkMessageBox.showerror("ERROR","Rename Agent failed - " + str(e))
 
 			# blank command or invalid value
 			else:
-				print "ERROR: Blank or invalid new Name value for " + self.selected_agent_name + "." + str(datetime.now())
+				tkMessageBox.showerror("ERROR","Blank or invalid new Name value for " + self.selected_agent_name)
 		
 		# handles the cancel action
 		except Exception as e:
@@ -2007,15 +2018,12 @@ class vader:
 	# kill agent
 	def api_kill_agent(self):
 		
-		# create instance of remove agent dialog window
-		kill_dialog = api_kill_agent_popup(self.form,self.selected_agent_name)
-		self.form.wait_window(kill_dialog.top)
-		
 		# check if remove_agent boolean True, if so remove agent
-		if kill_dialog.kill_agent:
+		if tkMessageBox.askyesno("Confirm Kill Agent","Are you sure you want to kill the Agent?"):
 			
 			# call to api function
 			response = self.eac_object.agents_kill_agent(self.selected_agent_name)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			try:
 				# kill was successful
@@ -2026,27 +2034,21 @@ class vader:
 			
 				# kill failed
 				else:
-					print "ERROR: Attempt to Kill Agent " + self.selected_agent_name + ": " + str(response['success']) +str(datetime.now())
+					tkMessageBox.showerror("ERROR","Attempt to Kill Agent FAILED - " + self.selected_agent_name)
 		
-	
 			# request bombed
 			except Exception as e:
-		
-				print "ERROR: Killing Agent failed - " + str(e) + " : " + str(response) + str(datetime.now())
+				tkMessageBox.showerror("ERROR","Killing Agent failed - " + str(e))
 	
 	# kill all agents
 	def api_kill_all_agents(self):
 		
-		
-		# create instance of remove agent dialog window
-		kill_all_dialog = api_kill_all_agents_popup(self.form)
-		self.form.wait_window(kill_all_dialog.top)
-		
 		# check if remove_agent boolean True, if so remove agent
-		if kill_all_dialog.kill_all_agents:
+		if tkMessageBox.askyesno("Confirm Kill ALL Agents","Are you sure you want to kill ALL Agents?"):
 			
 			# call to api function
 			response = self.eac_object.agents_kill_all_agents()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			try:
 				# kill all was successful
@@ -2057,13 +2059,11 @@ class vader:
 			
 				# kill failed
 				else:
-					print "ERROR: Attempt to Kill All Agents : " + str(response['success']) + str(datetime.now())
+					tkMessageBox.showerror("ERROR","Attempt to Kill All Agents FAILED.")
 		
-	
 			# request bombed
 			except Exception as e:
-		
-				print "ERROR: Killing All Agents failed - " + str(e) + " : " + str(response) + str(datetime.now())
+				tkMessageBox.showerror("ERROR","Killing All Agents failed - " + str(e))
 	
 		
 	####### MODULES FUNCTIONS #############
@@ -2073,6 +2073,7 @@ class vader:
 		
 		# call to api function
 		response = self.eac_object.modules_get_current_modules()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 		# JSON Parsing - response is a {'agents':[{dict1},{dict2},...]}
 		try:
@@ -2094,7 +2095,7 @@ class vader:
 		
 		# JSON Parsing Failed
 		except Exception as e:
-			print "ERROR: Get Current Modules failed." + str(e) + str(response) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Get Current Modules failed - " + str(e))
 		
 	# get current modules by keyword
 	def api_search_for_module(self):
@@ -2111,6 +2112,7 @@ class vader:
 			
 			# make api call with keyword data
 			response = self.eac_object.modules_search_for_module(keyword_data)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
 			# JSON Parsing - response is a {'agents':[{dict1},{dict2},...]}
 			try:
@@ -2157,6 +2159,7 @@ class vader:
 		
 		# call to the api with stager name
 		response = self.eac_object.modules_get_module_by_name(self.selected_module_name)
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 	
 		try:
 			
@@ -2168,18 +2171,17 @@ class vader:
 			except:
 				pass
 			
-			
 			# define the core frame
 			# required to hold the multiple dynamic labelframes in the canvas
 			self.temp_modules_dynamic_coreframe = Tkinter.Frame(self.modules_api_canvas)
 			self.modules_api_canvas.create_window(0,10,window=self.temp_modules_dynamic_coreframe,anchor=NW)
 			
 			# build details temporary frame
-			self.temp_modules_details_labelframe = Tkinter.LabelFrame(self.temp_modules_dynamic_coreframe,text="Module Details for : " + str(self.selected_module_name) + "     ")
+			self.temp_modules_details_labelframe = Tkinter.LabelFrame(self.temp_modules_dynamic_coreframe)
 			self.temp_modules_details_labelframe.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
 			
 			# build options temporary frame
-			self.temp_modules_options_labelframe = Tkinter.LabelFrame(self.temp_modules_dynamic_coreframe,text="Module Options for : " + str(self.selected_module_name) + "     ")
+			self.temp_modules_options_labelframe = Tkinter.LabelFrame(self.temp_modules_dynamic_coreframe)
 			self.temp_modules_options_labelframe.grid(row=1,column=0,sticky=NW,padx=5,pady=5)
 			
 			# ---------- Execute Button----------#
@@ -2203,29 +2205,55 @@ class vader:
 					
 					# regular key value print
 					if (key == "Name") or \
-					   (key == "Description") or \
 					   (key == "Background") or \
 					   (key == "MinPSVersion") or \
 					   (key == "NeedsAdmin") or \
 					   (key == "OpsecSafe") or \
 					   (key == "OutputExtension"):
-						   
+						
 						# Option Name
-						name_label = Tkinter.Label(self.temp_modules_details_labelframe,text=str(key) + ": ")
-						name_label.grid(row=row_count,column=0,sticky=NE)
-				
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_modules_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=E,padx=2,pady=2)
+					
 						# Option Field Value
-						field_label = Tkinter.Label(self.temp_modules_details_labelframe,text=str(value),wraplength=580,justify=LEFT)
-						field_label.grid(row=row_count,column=1,sticky=NW)
+						self.option_field_str = Tkinter.StringVar()
+						self.option_field_str.set(str(value))
+						self.option_entry_field = Tkinter.Entry(self.temp_modules_details_labelframe,textvariable=self.option_field_str,width=70)
+						self.option_entry_field.config(state="disabled",disabledbackground="ghost white",disabledforeground="black")
+						self.option_entry_field.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 												
 						# increment the row count
 						row_count += 1
 					
+					elif (key == "Description"):
+						
+						# Option Name
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_modules_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=NE,padx=2,pady=2)
+						
+						# Option Field Value
+						self.option_entry_textbox = ScrolledText(self.temp_modules_details_labelframe,width=80,height=3)
+						self.option_entry_textbox.config(bg="ghost white",state="disabled")
+						self.option_entry_textbox.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
+						
+						self.option_entry_textbox.config(state="normal")
+						self.option_entry_textbox.insert(Tkinter.END,str(value))
+						self.option_entry_textbox.config(state="disabled")
+												
+						# increment the row count
+						row_count += 1
+						
 					elif (key == "Author"):
 							 
 						# Option Name
-						name_label = Tkinter.Label(self.temp_modules_details_labelframe,text=str(key) + ": ")
-						name_label.grid(row=row_count,column=0,sticky=NE)
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_modules_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=E,padx=2,pady=2)
 						
 						 # Option Field Value
 						authors = ""							
@@ -2234,9 +2262,12 @@ class vader:
 						for i in value:
 							authors += i + " " 
 							
-						# grid the field dlablel
-						field_label = Tkinter.Label(self.temp_modules_details_labelframe,text=str(authors),wraplength=580,justify=LEFT)
-						field_label.grid(row=row_count,column=1,sticky=NW)
+						# Option Field Value
+						self.option_field_str = Tkinter.StringVar()
+						self.option_field_str.set(str(authors))
+						self.option_entry_field = Tkinter.Entry(self.temp_modules_details_labelframe,textvariable=self.option_field_str,width=70)
+						self.option_entry_field.config(state="disabled",disabledbackground="ghost white",disabledforeground="black")
+						self.option_entry_field.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 						
 						# increment the row count
 						row_count += 1
@@ -2244,8 +2275,10 @@ class vader:
 					elif (key == "Comments"):
 							 
 						# Option Name
-						name_label = Tkinter.Label(self.temp_modules_details_labelframe,text=str(key) + ": ")
-						name_label.grid(row=row_count,column=0,sticky=NE)
+						self.option_name_str = Tkinter.StringVar()
+						self.option_name_str.set(str(key))
+						self.option_name_dlabel = Tkinter.Label(self.temp_modules_details_labelframe,textvariable=self.option_name_str,justify=LEFT)
+						self.option_name_dlabel.grid(row=row_count,column=0,sticky=NE,padx=2,pady=2)
 												
 						# comment string
 						comments = "" 
@@ -2254,9 +2287,14 @@ class vader:
 						for i in value:
 							comments += i + " "
 								
-						# grid the field dlablel								
-						field_label = Tkinter.Label(self.temp_modules_details_labelframe,text=str(comments),wraplength=580,justify=LEFT)
-						field_label.grid(row=row_count,column=1,sticky=NW)
+						# Option Field Value
+						self.option_entry_textbox = ScrolledText(self.temp_modules_details_labelframe,width=80,height=3)
+						self.option_entry_textbox.config(bg="ghost white",state="disabled")
+						self.option_entry_textbox.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
+						
+						self.option_entry_textbox.config(state="normal")
+						self.option_entry_textbox.insert(Tkinter.END,str(comments))
+						self.option_entry_textbox.config(state="disabled")
 						
 						# increment the row count
 						row_count += 1
@@ -2295,28 +2333,29 @@ class vader:
 								if key2 == "Agent":
 									
 									# grid universal Listener drop down
-									response = self.eac_object.agents_get_current_agents()
+									agent_response = self.eac_object.agents_get_current_agents()
+									self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 									
 									# list holding listener names, dropdown choices
-									choices = []
+									agent_choices = []
 									
 									# if no listeners, append blank
-									if len(response['agents']) == 0: choices.append('');
+									if len(agent_response['agents']) == 0: agent_choices.append('');
 								
 									# else, grab name for each listener, append to choices list
 									else:
 								
 										try:
 									
-											for item in response['agents']:
+											for item in agent_response['agents']:
 										
-												choices.append(str(item['name']))
+												agent_choices.append(str(item['name']))
 										
 										except Exception as e:
 											tkMessageBox.showerror("ERROR","Creating Agent optionmenu for Modules tab: " + str(e))
 									
 									# build the drop down menu
-									option_agent_field = Tkinter.OptionMenu(self.temp_modules_options_labelframe,self.option_agent_field_str,*choices,command=self.misc_set_modules_agent_field_str)
+									option_agent_field = Tkinter.OptionMenu(self.temp_modules_options_labelframe,self.option_agent_field_str,*agent_choices,command=self.misc_set_modules_agent_field_str)
 									option_agent_field.grid(row=row_count,column=1,sticky=NW,padx=1,pady=1)
 									option_agent_field.config(background="wheat",width=25)
 								
@@ -2325,28 +2364,29 @@ class vader:
 								elif key2 == "Listener":
 									
 									# grid universal Listener drop down
-									response = self.eac_object.listeners_get_current_listeners()
+									listener_response = self.eac_object.listeners_get_current_listeners()
+									self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 									
 									# list holding listener names, dropdown choices
-									choices = []
+									listener_choices = []
 									
 									# if no listeners, append blank
-									if len(response['listeners']) == 0: choices.append('');
+									if len(listener_response['listeners']) == 0: listener_choices.append('');
 								
 									# else, grab name for each listener, append to choices list
 									else:
 								
 										try:
 									
-											for item in response['listeners']:
+											for item in listener_response['listeners']:
 										
-												choices.append(str(item['name']))
+												listener_choices.append(str(item['name']))
 										
 										except Exception as e:
 											tkMessageBox.showerror("ERROR","Creating Listener optionmenu for Modules tab: " + str(e))
 									
 									# build the drop down menu
-									option_listener_field = Tkinter.OptionMenu(self.temp_modules_options_labelframe,self.option_listener_field_str,*choices,command=self.misc_set_modules_listener_field_str)
+									option_listener_field = Tkinter.OptionMenu(self.temp_modules_options_labelframe,self.option_listener_field_str,*listener_choices,command=self.misc_set_modules_listener_field_str)
 									option_listener_field.grid(row=row_count,column=1,sticky=NW,padx=1,pady=1)
 									option_listener_field.config(background="wheat",width=25)
 								
@@ -2396,7 +2436,8 @@ class vader:
 				try:
 					
 					if self.temp_modules_options_labelframe.winfo_children()[i].winfo_class() == "Menubutton":
-						vals.append(self.option_agent_field_str.get())
+						
+						vals.append(str(self.temp_modules_options_labelframe.winfo_children()[i].cget("text")))
 						
 					else:
 						vals.append(self.temp_modules_options_labelframe.winfo_children()[i].get())
@@ -2420,7 +2461,7 @@ class vader:
 					# if so, error out and stop
 					if (self.temp_module_keys_list[i] in self.temp_module_reqd_keys_list) and (vals[i] == ""):
 						
-						print "ERROR: Required field missing - " +  str(self.temp_module_keys_list[i]) + str(datetime.now())
+						tkMessageBox.showerror("ERROR","Required field missing - " +  str(self.temp_module_keys_list[i]))
 						return
 					
 					# required fields met, append to dictionary
@@ -2439,11 +2480,11 @@ class vader:
 			
 			# -- Send the Create Stagers Command --- #
 			self.eac_object.modules_execute_module(self.selected_module_name,temp_dict)
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 		except Exception as e:
-			print "ERROR: Execute Module JSON Parse failed. " + str(response) + str(e) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Execute Module JSON Parse failed - " + str(e))
 			
-				
 	####### REPORTING FUNCTIONS ############
 		
 	# display report output 
@@ -2457,6 +2498,7 @@ class vader:
 			
 			# make call to api
 			response = self.eac_object.reporting_get_all_logged_events()
+			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# clear the reporting treerview textbox
 			self.reporting_tree.delete(*self.reporting_tree.get_children())
@@ -2478,7 +2520,7 @@ class vader:
 				self.reporting_tree.yview_moveto(1)
 				
 			except Exception as e:
-				print "ERROR: Error parsing Get All Events - " + str(e) + " : " + str(response) + str(datetime.now())
+				tkMessageBox.showerror("ERROR","Error parsing Get All Events - " + str(e))
 			
 		
 		# agent event option selected
@@ -2492,6 +2534,7 @@ class vader:
 			
 				# make call to api
 				response = self.eac_object.reporting_get_agent_logged_events(agent_name)
+				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 				
 				# clear the reporting treerview textbox
 				self.reporting_tree.delete(*self.reporting_tree.get_children())
@@ -2513,11 +2556,11 @@ class vader:
 					self.reporting_tree.yview_moveto(1)
 						
 				except Exception as e:
-					print "ERROR: Error parsing Get Agent Events - " + str(e) + " : " + str(response) + str(datetime.now())
+					tkMessageBox.showerror("ERROR","Error parsing Get Agent Events - " + str(e))
 		
 			# agent name is blank
 			else:
-				print "ERROR: Please select an Agent Name for request." + str(datetime.now())
+				tkMessageBox.showerror("ERROR","Please select an Agent Name for request.")
 		
 		
 		# type event option selected
@@ -2531,6 +2574,7 @@ class vader:
 			
 				# make call to api
 				response = self.eac_object.reporting_get_logged_events_of_specific_type(type_name)
+				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 				
 				# clear the reporting treerview textbox
 				self.reporting_tree.delete(*self.reporting_tree.get_children())
@@ -2552,11 +2596,11 @@ class vader:
 					self.reporting_tree.yview_moveto(1)
 					
 				except Exception as e:
-					print "ERROR: Error parsing Get Type Events - " + str(e) + " : " + str(response) + str(datetime.now())
+					tkMessageBox.showerror("ERROR","Error parsing Get Type Events - " + str(e))
 		
 			# type name is blank
 			else:
-				print "ERROR: Please select an Event Type for request." + str(datetime.now())
+				tkMessageBox.showerror("ERROR","Please select an Event Type for request.")
 			
 		
 		# msg event option selected
@@ -2570,6 +2614,7 @@ class vader:
 			
 				# make call to api
 				response = self.eac_object.reporting_get_logged_events_with_specific_msg(msg_value)
+				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 				
 				# clear the reporting treerview textbox
 				self.reporting_tree.delete(*self.reporting_tree.get_children())
@@ -2591,18 +2636,18 @@ class vader:
 					self.reporting_tree.yview_moveto(1)
 						
 				except Exception as e:
-					print "ERROR: Error parsing Msg Events - " + str(e) + " : " + str(response) + str(datetime.now())
+					tkMessageBox.showerror("ERROR","Error parsing Msg Events - " + str(e))
 		
 			# agent name is blank
 			else:
-				print "ERROR: Please a Msg keyword for the request." + str(datetime.now())
-
+				tkMessageBox.showerror("ERROR","Please a Msg keyword for the request.")
 
 	######### CREDENTIAL FUNCTIONS #######
 	def api_get_stored_credentials(self):
 		
 		# make call to api
 		response = self.eac_object.creds_get_stored_credentials()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 		# clear the reporting treerview textbox
 		self.creds_tree.delete(*self.creds_tree.get_children())
@@ -2626,7 +2671,7 @@ class vader:
 			else: pass;
 			
 		except Exception as e:
-			print "ERROR: Error parsing Get Credentials - " + str(e) + " : " + str(response) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Error parsing Get Credentials - " + str(e))
 
 	
 	####### ERROR HANDLING AND RESET FUNCTIONS #############
@@ -2637,24 +2682,66 @@ class vader:
 		# attempt to set values
 		# return if value missing and log
 		if not self.eac_object.api_set_username(self.api_username_str.get()):
-			print "ERROR: Please enter a value for Username." + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Please enter a value for Username.")
 			return False
 		
 		elif not self.eac_object.api_set_password(self.api_password_str.get()):
-			print "ERROR: Please enter a value for Password." + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Please enter a value for Password.")
 			return False
 			
 		elif not self.eac_object.api_set_host(self.api_host_str.get()):
-			print "ERROR: Please enter a value for Host." + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Please enter a value for Host.")
 			return False
 			
 		elif not self.eac_object.api_set_port(self.api_port_str.get()):
-			print "ERROR: Please enter a value for Port." + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Please enter a value for Port.")
 			return False
 		
 		else: return True
 	
 	###### MISC FUNCTIONS
+	
+	# API Log ScrollTest
+	#------------------
+	
+	# write to the API log ScrollText
+	def misc_api_log_write(self,value):
+		
+		try:
+			# add to the log window
+			self.api_log_textbox.config(state="normal")
+			self.api_log_textbox.tag_config('api_log',font=('1'))
+			self.api_log_textbox.insert(Tkinter.END,"[API LOG] " + str(value),'api_log')
+			self.api_log_textbox.config(state="disabled")
+			self.api_log_textbox.see(Tkinter.END)
+		
+		except Exception as e:
+			tkMessageBox.showerror("ERROR","Failed to write to API Log: " + str(e))
+			
+			
+	# write to the API log ScrollText
+	def misc_api_log_polling_write(self,value):
+		
+		dstr = ""
+		
+		holder = ast.literal_eval(value)
+		
+		for key,val in holder.iteritems():
+			
+			dstr += str(key).upper() + " = " + str(val) + " , "
+
+		dstr = dstr[:-2]
+		
+		try:
+			# add to the log window
+			self.api_log_textbox.config(state="normal")
+			self.api_log_textbox.tag_config('api_poll',foreground='lawn green',font=('1','12'))
+			self.api_log_textbox.insert(Tkinter.END,"[API POLL] " + dstr + "\n",'api_poll')
+			self.api_log_textbox.config(state="disabled")
+			self.api_log_textbox.see(Tkinter.END)
+		
+		except Exception as e:
+			tkMessageBox.showerror("ERROR","Failed to write to API Poll Log: " + str(e))		
 	
 	# Stager Misc
 	# ------------
@@ -2676,7 +2763,6 @@ class vader:
 	def misc_set_modules_listener_field_str(self,value):
 
 		self.option_listener_field_str.set(value)
-	
 	
 	# Reporting Misc
 	# ------------
@@ -2767,10 +2853,10 @@ class vader:
 				pass
 			
 		except Exception as e:
-			print "ERROR: Exception on Report Event click: " + str(e) + str(datetime.now())
-	
+			tkMessageBox.showerror("ERROR","Exception on Report Event click: " + str(e))
 	
 	# Credentials Misc
+	# ------------
 	
 	# handle credential display event for details window
 	def misc_creds_display_event_details(self,event):
@@ -2788,7 +2874,7 @@ class vader:
 				pass
 			
 		except Exception as e:
-			print "ERROR: Exception on Credentials Event click: " + str(e) + str(datetime.now())
+			tkMessageBox.showerror("ERROR","Exception on Credentials Event click: " + str(e))
 	
 	# Universal Misc
 	def misc_col_sort(self,tree,col,descending):
@@ -2802,10 +2888,89 @@ class vader:
 		for ix, item in enumerate(data):
 			tree.move(item[1], '', ix)
 			
+
+	# API LOGGING THREADS
+	
+	# Display to scrolledtext function - THREAD FUNCTION
+	def api_thread_display_queue(self):
+	
+		# infinite loop
+		while True:
+			
+			try:
+				# print the content to screen
+				self.misc_api_log_polling_write(str(self.api_log_queue.get())+"\n")
+				self.api_log_queue.task_done()
+			except:
+				pass
+					
+	# Grab new content and send to Queue for display - THREAD FUNCTION
+	def api_thread_update_queue(self,q):
 		
-	
-	###### START APPLICATION #######
-	
+		# 1. get all past events
+		response = self.eac_object.reporting_get_all_logged_events()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
+		
+		# temp lists for each report type
+		# will hold all exisiting report events
+		temp_checkin = []
+		temp_result = []
+		temp_task = []
+		
+		for item in response['reporting']:
+			
+			for key,value in item.iteritems():
+				
+				if key == "event_type":
+		
+					# append to temp list based on type; 3 options
+					if value == "checkin":
+						temp_checkin.append(item)
+						
+					elif value == "result":
+						temp_result.append(item)
+					
+					elif value == "task":
+						temp_task.append(item)
+						
+		# infinite loop
+		while True:
+			
+			# continue to poll events; append to queue if necessary
+			response = self.eac_object.reporting_get_all_logged_events()
+			
+			for item in response['reporting']:
+			
+				for key,value in item.iteritems():
+				
+					if key == "event_type":
+					
+						# check for new events based on type
+						# if not original event, add to queue display
+					
+						if value == "checkin":
+							
+							if item not in temp_checkin:
+								temp_checkin.append(item)
+								q.put(item)
+								break
+						
+						elif value == "result":
+							
+							if item not in temp_result:
+								temp_result.append(item)
+								q.put(item)
+								break
+					
+						elif value == "task":
+							if item not in temp_task:
+								temp_task.append(item)
+								q.put(item)
+								break
+			# loop control
+			time.sleep(1)
+		
+	###### START APPLICATION #######	
 	def start_application(self):
 		self.form.mainloop() 
 

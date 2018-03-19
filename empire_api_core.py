@@ -182,6 +182,16 @@ class empire_api_core:
 		
 	
 	#### API FUNCTIONS ######	
+	
+	# get the current Empire Version
+	def api_config_get_current_version(self):
+		
+		# Handler : GET /api/version
+		# Description : Returns the current Empire version.
+		# No parameters
+		
+		return self.api_send_request("GET","/api/version?token=" + self.api_request_token,"")
+	
 		
 	# API - Get Empire API Configuration Information
 	def api_config_info(self):

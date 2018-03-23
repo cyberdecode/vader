@@ -1,6 +1,6 @@
-# badhackjob, blog.cyberdecode.com
-# vader.py - Tkinter Frontend for Empire Project
+# Vader.py - Tkinter Frontend for Empire Project
 # v1.0.3.2018
+# @badhackjob
 
 import Tkinter
 from Tkinter import *
@@ -164,7 +164,7 @@ class credentials_event_details_window:
 		scrolltext.config(state="normal")
 		scrolltext.grid(row=0,column=0,sticky='NEWS')
 				
-		keys = [ "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
+		keys = [ "ID", "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
 		
 		for i in range(0,len(keys)):
 			scrolltext.insert(Tkinter.END,keys[i] + ": " + str(data[i]) + "\n")
@@ -186,6 +186,9 @@ class vader:
 		# module outfile path
 		self.module_outfile_path = ""
 		
+		# empire version string
+		self.empire_version = ""
+		
 		# reporting by agent name choice dict
 		self.reporting_agent_choices = []
 		self.reporting_agent_choices.append("")
@@ -204,11 +207,10 @@ class vader:
 		self.form.wm_title(' Vader.py - v1.0.3.2018 ')
 		self.form.resizable(0,0)
 		
-		
 		###### ACTION TABS FRAME #######
 		
 		# application tabs notebook, child to the form, parent to the tabs
-		self.nb = ttk.Notebook(self.form,height=500,width=1300)
+		self.nb = ttk.Notebook(self.form,height=600,width=1300)
 		self.nb.pack(fill=BOTH, expand=True)
 		self.nb.pressed_index = None
 		
@@ -340,9 +342,9 @@ class vader:
 				
 		##### CONNECTION INFO FRAME ##############
 		
-		##### API ACTION FRAME ##############
+		##### API BUTTON FRAME ##############
 		self.api_action_lframe = Tkinter.LabelFrame(self.admin_api)
-		self.api_action_lframe.grid(row=0,column=1,padx=10,pady=5,sticky=NW,rowspan=2)
+		self.api_action_lframe.grid(row=0,column=1,padx=10,pady=5,sticky=NW)
 		
 		# Get Permanent Session Token
 		self.api_action_get_perm_session_button = Tkinter.Button(self.api_action_lframe,text="Get Permanent Token",command=self.api_get_perm_session)
@@ -384,7 +386,7 @@ class vader:
 		self.api_request_token_field = Tkinter.Entry(self.api_config_lframe,textvariable=self.api_request_token_str,width=45)
 		self.api_request_token_field.grid(row=1,column=1,sticky=W)
 		self.api_request_token_field.config(state="readonly") 
-		
+				
 	# LISTENERS Tab 
 	def build_listeners_tab(self):
 		
@@ -559,97 +561,27 @@ class vader:
 		except:
 			pass
 		
-		##### REPORTING MAIN FRAME ##############
-		
-		self.reporting_main_lframe = Tkinter.LabelFrame(self.report_api)
-		self.reporting_main_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
-		
-		# Reporting Type Radio Button
-		self.reporting_type_int = IntVar()
-		self.reporting_type_int.set(1)
-		
-		# 1. all events
-		reporting_type_all_events = Radiobutton(self.reporting_main_lframe,text="Get All Logged Events",variable=self.reporting_type_int,value=1)
-		reporting_type_all_events.config(command=self.misc_reporting_type_option_select)
-		reporting_type_all_events.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
-		
-		# 2. agent events
-		reporting_type_agent_events = Radiobutton(self.reporting_main_lframe,text="Get Agent Logged Events",variable=self.reporting_type_int,value=2)
-		reporting_type_agent_events.config(command=self.misc_reporting_type_option_select)
-		reporting_type_agent_events.grid(row=1,column=0,sticky=NW,padx=5,pady=5)
-		
-		# global reporting agent field string
-		self.reporting_agent_field_str = Tkinter.StringVar()
-		
-		# build the agent drop down menu
-		holder = []
-		holder = self.reporting_agent_choices
-				
-		self.reporting_agent_option_menu = Tkinter.OptionMenu(self.reporting_main_lframe,self.reporting_agent_field_str,*holder,command=self.misc_set_reporting_agent_field_str)
-		self.reporting_agent_option_menu.grid(row=1,column=1,sticky=NW,padx=5,pady=5)
-		self.reporting_agent_option_menu.config(state="disabled")
-	
-		# 3. specific type events
-		reporting_type_specifictype = Radiobutton(self.reporting_main_lframe,text="Get Logged Events of Specific Type",variable=self.reporting_type_int,value=3)
-		reporting_type_specifictype.config(command=self.misc_reporting_type_option_select)
-		reporting_type_specifictype.grid(row=2,column=0,sticky=NW,padx=5,pady=5)
-		
-		# global reporting type field string
-		self.reporting_type_field_str = Tkinter.StringVar()
-		
-		# build the type drop down menu
-		choices = ['checkin','task','result']
-		self.reporting_type_option_menu = Tkinter.OptionMenu(self.reporting_main_lframe,self.reporting_type_field_str,*choices,command=self.misc_set_reporting_type_field_str)
-		self.reporting_type_option_menu.grid(row=2,column=1,sticky=NW,padx=5,pady=5)
-		self.reporting_type_option_menu.config(state="disabled")
-		
-		# 4. specific msg events
-		reporting_type_specificmsg = Radiobutton(self.reporting_main_lframe,text="Get Logged Events w/ Specific Msg",variable=self.reporting_type_int,value=4)
-		reporting_type_specificmsg.config(command=self.misc_reporting_type_option_select)
-		reporting_type_specificmsg.grid(row=3,column=0,sticky=NW,padx=5,pady=5)
-		
-		# Define reporting msg string
-		self.reporting_msg_field_str = Tkinter.StringVar()
-		
-		self.reporting_type_specificmsg_entry = Tkinter.Entry(self.reporting_main_lframe,textvariable=self.reporting_msg_field_str,width=20)
-		self.reporting_type_specificmsg_entry.grid(row=3,column=1,sticky=NW,padx=5,pady=5) 
-		self.reporting_type_specificmsg_entry.config(state="disabled")
-		
-		#### INFO LABEL ######
-		reporting_info_label = Tkinter.StringVar()	
-		reporting_info_label.set("*  Use the Refresh Agents button to update the Agent option menu.") 
-		reporting_info_dlabel = Tkinter.Label(self.report_api,textvariable=reporting_info_label)
-		reporting_info_dlabel.grid(row=1,column=0,padx=5,pady=5,sticky='nw')
-		
-		######### ACTIONS Main FRAME ##############
-		reporting_actions_lframe = Tkinter.LabelFrame(self.report_api)
-		reporting_actions_lframe.grid(row=2,column=0,padx=5,pady=5,sticky='nw')
-		
-		# ---------- Request Events----------#
-		reporting_request_button = Tkinter.Button(reporting_actions_lframe,text="  Request Events  ",command=self.reporting_display_output)
-		reporting_request_button.config(fg='white',bg='blue',font=('arial','10','bold'))
-		reporting_request_button.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
-		
-		# ---------- Refresh Events----------#
-		reporting_refresh_button = Tkinter.Button(reporting_actions_lframe,text="  Refresh Agents  ",command=self.misc_reporting_action_refresh)
-		reporting_refresh_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
-		reporting_refresh_button.grid(row=0,column=1,sticky=NW,padx=5,pady=5)
-    
 		##### REPORTING OUTPUT ##############
 		
 		self.reporting_output_lframe = Tkinter.LabelFrame(self.report_api)
-		self.reporting_output_lframe.grid(row=0,column=1,padx=5,pady=5,sticky='nw',rowspan=20)
+		self.reporting_output_lframe.grid(row=0,column=0,padx=5,pady=5,sticky='nw')
+		
+		# ---------- Request Events----------#
+		reporting_request_button = Tkinter.Button(self.reporting_output_lframe,text="  Request Events  ",command=self.reporting_display_output)
+		reporting_request_button.config(fg='white',bg='blue',font=('arial','10','bold'))
+		reporting_request_button.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
+		
 		
 		cols = [ "EventType", "TimeStamp", "TaskID", "AgentName", "Message", "ID" ]
 
-		self.reporting_tree = ttk.Treeview(self.reporting_output_lframe, columns=cols, show="headings",height="21")
+		self.reporting_tree = ttk.Treeview(self.reporting_output_lframe, columns=cols, show="headings",height="20")
 		self.reporting_tree.bind("<Double-1>", self.misc_reporting_display_event_details)
 		
 		for c in cols:
 			self.reporting_tree.heading(c, text=str(c), command=lambda x=c: self.misc_col_sort(self.reporting_tree, x, 0) )
-			self.reporting_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 14))
+			self.reporting_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 25))
 		
-		self.reporting_tree.grid(row=0,column=0,padx=2,pady=2)
+		self.reporting_tree.grid(row=1,column=0,padx=5,pady=5)
 	
 	# CREDENTIALS tab
 	def build_credentials_tab(self):
@@ -659,7 +591,7 @@ class vader:
 		self.creds_output_lframe.grid(row=0,column=0,padx=10,pady=10,sticky=NW)
 		
 		# refresh button
-		self.creds_refresh_button = Button(self.creds_output_lframe,text="Refresh Creds",command=self.api_get_stored_credentials)
+		self.creds_refresh_button = Button(self.creds_output_lframe,text="Refresh Credentials",command=self.api_get_stored_credentials)
 		self.creds_refresh_button.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 		self.creds_refresh_button.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 		
@@ -668,14 +600,14 @@ class vader:
 		self.creds_label_info.grid(row=1,column=0,padx=5,pady=5,sticky=NW)
 		
 		# build creds treeview
-		cols = [ "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
+		cols = [ "ID", "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
 		
 		self.creds_tree = ttk.Treeview(self.creds_output_lframe, columns=cols, show="headings",height="18")
 		self.creds_tree.bind("<Double-1>", self.misc_creds_display_event_details)
 		
 		for c in cols:
 			self.creds_tree.heading(c, text=str(c), command=lambda x=c: self.misc_col_sort(self.creds_tree, x, 0))
-			self.creds_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 21))
+			self.creds_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 18))
 		
 		self.creds_tree.grid(row=2,column=0,padx=2,pady=2)
 		
@@ -689,7 +621,6 @@ class vader:
 			
 			# get session token request successful (True)
 			response = self.eac_object.admin_get_session_token()
-			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
 			# authentication successful
 			if response == True:
@@ -752,7 +683,6 @@ class vader:
 				except Exception as e:
 					tkMessageBox.showerror("ERROR","Error enabling additional application tabs and function calls: " + str(e))
 				
-				
 				# start the API Logging Threads
 				self.api_log_update_thread = Thread(target=self.api_thread_update_queue,args=(self.api_log_queue,))
 				self.api_log_update_thread.setDaemon(True)
@@ -761,7 +691,6 @@ class vader:
 				self.api_log_display_thread = Thread(target=self.api_thread_display_queue)
 				self.api_log_display_thread.setDaemon(True)
 				self.api_log_display_thread.start()
-				
 				
 			else:
 				tkMessageBox.showerror("ERROR","Unable to retrieve Session Token with provided authentication info:" + response)
@@ -1796,7 +1725,7 @@ class vader:
 			self.temp_RefreshButton.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 			self.temp_RefreshButton.grid(row=0,column=4,sticky=W,padx=2,pady=2)
 		
-			self.temp_agents_results_scrolledtext = ScrolledText(self.temp_agent_results_labelframe,height=18,width=147)
+			self.temp_agents_results_scrolledtext = ScrolledText(self.temp_agent_results_labelframe,height=25,width=147)
 			self.temp_agents_results_scrolledtext.config(bg='ghost white')
 			self.temp_agents_results_scrolledtext.grid(row=1,column=0,columnspan=50,sticky='NEWS',padx=2,pady=2)
 			self.temp_agents_results_scrolledtext.config(state="disabled")
@@ -2490,157 +2419,32 @@ class vader:
 	# display report output 
 	def reporting_display_output(self):
 
-		# get the value of the IntVar for the reporting radio buttons
-		selection = str(self.reporting_type_int.get())
-		
-		# all event option selected
-		if selection == "1":
+		# make call to api
+		response = self.eac_object.reporting_get_all_logged_events()
+		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 			
-			# make call to api
-			response = self.eac_object.reporting_get_all_logged_events()
-			self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
+		# clear the reporting treerview textbox
+		self.reporting_tree.delete(*self.reporting_tree.get_children())
 			
-			# clear the reporting treerview textbox
-			self.reporting_tree.delete(*self.reporting_tree.get_children())
-			
-			try:
+		try:
 				
-				for item in response['reporting']:
-					
-					holder = ()
-					
-					for key,value in item.iteritems():
-					
-						holder += (str(value),)
-						
-					# add to reporting tree
-					self.reporting_tree.insert('','end',values=holder)
-					
-				# set to the end of entrie
-				self.reporting_tree.yview_moveto(1)
+			for item in response['reporting']:
 				
-			except Exception as e:
-				tkMessageBox.showerror("ERROR","Error parsing Get All Events - " + str(e))
-			
-		
-		# agent event option selected
-		elif selection == "2":
-			
-			# grab the agent option menu value
-			agent_name = self.reporting_agent_field_str.get()
-			
-			# check agent name not blank
-			if agent_name != "":
-			
-				# make call to api
-				response = self.eac_object.reporting_get_agent_logged_events(agent_name)
-				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
+				holder = ()
 				
-				# clear the reporting treerview textbox
-				self.reporting_tree.delete(*self.reporting_tree.get_children())
-			
-				try:
-					
-					for item in response['reporting']:
-						
-						holder = ()
-						
-						for key,value in item.iteritems():
-						
-							holder += (str(value),)
-						
-						# add to reporting tree
-						self.reporting_tree.insert('','end',values=holder)
-					
-					# set to the end of entrie
-					self.reporting_tree.yview_moveto(1)
-						
-				except Exception as e:
-					tkMessageBox.showerror("ERROR","Error parsing Get Agent Events - " + str(e))
-		
-			# agent name is blank
-			else:
-				tkMessageBox.showerror("ERROR","Please select an Agent Name for request.")
-		
-		
-		# type event option selected
-		elif selection == "3":
-			
-			# grab the type option menu value
-			type_name = self.reporting_type_field_str.get()
-			
-			# check type name not blank
-			if type_name != "":
-			
-				# make call to api
-				response = self.eac_object.reporting_get_logged_events_of_specific_type(type_name)
-				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
+				for key,value in item.iteritems():
 				
-				# clear the reporting treerview textbox
-				self.reporting_tree.delete(*self.reporting_tree.get_children())
-			
-				try:
+					holder += (str(value),)
 					
-					for item in response['reporting']:
-						
-						holder = ()
-						
-						for key,value in item.iteritems():
-						
-							holder += (str(value),)
-						
-						# add to reporting tree
-						self.reporting_tree.insert('','end',values=holder)
-					
-					# set to the end of entrie
-					self.reporting_tree.yview_moveto(1)
-					
-				except Exception as e:
-					tkMessageBox.showerror("ERROR","Error parsing Get Type Events - " + str(e))
-		
-			# type name is blank
-			else:
-				tkMessageBox.showerror("ERROR","Please select an Event Type for request.")
-			
-		
-		# msg event option selected
-		elif selection == "4":
-			
-			# grab the msg value
-			msg_value = str(self.reporting_msg_field_str.get())
-			
-			# check msg not blank
-			if msg_value != "":
-			
-				# make call to api
-				response = self.eac_object.reporting_get_logged_events_with_specific_msg(msg_value)
-				self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
+				# add to reporting tree
+				self.reporting_tree.insert('','end',values=holder)
 				
-				# clear the reporting treerview textbox
-				self.reporting_tree.delete(*self.reporting_tree.get_children())
+			# set to the end of entrie
+			self.reporting_tree.yview_moveto(1)
 			
-				try:
-					
-					for item in response['reporting']:
-						
-						holder = ()
-						
-						for key,value in item.iteritems():
-						
-							holder += (str(value),)
-						
-						# add to reporting tree
-						self.reporting_tree.insert('','end',values=holder)
-					
-					# set to the end of entrie
-					self.reporting_tree.yview_moveto(1)
-						
-				except Exception as e:
-					tkMessageBox.showerror("ERROR","Error parsing Msg Events - " + str(e))
-		
-			# agent name is blank
-			else:
-				tkMessageBox.showerror("ERROR","Please a Msg keyword for the request.")
+		except Exception as e:
+			tkMessageBox.showerror("ERROR","Error parsing Get All Events - " + str(e))
+
 
 	######### CREDENTIAL FUNCTIONS #######
 	def api_get_stored_credentials(self):
@@ -2656,11 +2460,16 @@ class vader:
 			
 			# check if creds response has items
 			if len(response['creds']) != 0:
+				
 				for item in response['creds']:
 					
 					holder = ()
 					
 					for key,value in item.iteritems():
+					
+						if key == "ID":
+					
+					
 					
 						holder += (str(value),)
 						
@@ -2701,7 +2510,7 @@ class vader:
 	
 	###### MISC FUNCTIONS
 	
-	# API Log ScrollTest
+	# API Log ScrollText
 	#------------------
 	
 	# write to the API log ScrollText
@@ -2718,28 +2527,74 @@ class vader:
 		except Exception as e:
 			tkMessageBox.showerror("ERROR","Failed to write to API Log: " + str(e))
 			
-			
-	# write to the API log ScrollText
+	# write to the API log ScrollText - POLLING
 	def misc_api_log_polling_write(self,value):
 		
-		dstr = ""
+		dstr = "" # detail string
+		mstr = "" # message string
+		fstr = ""
 		
 		holder = ast.literal_eval(value)
 		
 		for key,val in holder.iteritems():
 			
-			dstr += str(key).upper() + " = " + str(val) + " , "
-
-		dstr = dstr[:-2]
+			if key == "message":
+				
+				for key2,val2 in val.iteritems():
+					
+					if key2 == "message":
+						
+						if "[!]" in str(val2):
+							
+							if "Nonce verified" in str(val2):
+								dstr += str(val2)
+								
+							else:
+								fstr += str(val2).replace('\n',' ')
+						
+						elif "[+]" in str(val2):
+							
+							mstr += str(val2)
+							
+						elif "[*]" in str(val2):
+							
+							if ("TASKING_REQUEST" in str(val2)) or \
+							   ("GET cookie" in str(val2)) or \
+							   ("GET request" in str(val2)):
+								   continue
+							
+							else:
+								dstr += str(val2)
+								continue
 		
+		# try to write to the log output frame
 		try:
-			# add to the log window
-			self.api_log_textbox.config(state="normal")
-			self.api_log_textbox.tag_config('api_poll',foreground='lawn green',font=('1','12'))
-			self.api_log_textbox.insert(Tkinter.END,"[API POLL] " + dstr + "\n",'api_poll')
-			self.api_log_textbox.config(state="disabled")
-			self.api_log_textbox.see(Tkinter.END)
-		
+			
+			if dstr != "":
+				# add to the log window
+				self.api_log_textbox.config(state="normal")
+				self.api_log_textbox.tag_config('api_poll_dstr',foreground='cyan',font=('1','12'))
+				self.api_log_textbox.insert(Tkinter.END,"[API POLL] " + dstr + "\n",'api_poll_dstr')
+				self.api_log_textbox.config(state="disabled")
+				self.api_log_textbox.see(Tkinter.END)
+				
+			if mstr != "":
+
+				self.api_log_textbox.config(state="normal")
+				self.api_log_textbox.tag_config('api_poll_mstr',foreground='lawn green',font=('1','12'))
+				self.api_log_textbox.insert(Tkinter.END,"[API MSG] " + mstr + "\n",'api_poll_mstr')
+				self.api_log_textbox.config(state="disabled")
+				self.api_log_textbox.see(Tkinter.END)
+				
+			if fstr != "":
+				
+				self.api_log_textbox.config(state="normal")
+				self.api_log_textbox.tag_config('api_poll_fstr',foreground='indianred1',font=('1','12'))
+				self.api_log_textbox.insert(Tkinter.END,"[API ERROR] " + fstr + "\n",'api_poll_fstr')
+				self.api_log_textbox.config(state="disabled")
+				self.api_log_textbox.see(Tkinter.END)
+				
+	
 		except Exception as e:
 			tkMessageBox.showerror("ERROR","Failed to write to API Poll Log: " + str(e))		
 	
@@ -2903,7 +2758,7 @@ class vader:
 				self.api_log_queue.task_done()
 			except:
 				pass
-					
+				
 	# Grab new content and send to Queue for display - THREAD FUNCTION
 	def api_thread_update_queue(self,q):
 		
@@ -2911,27 +2766,12 @@ class vader:
 		response = self.eac_object.reporting_get_all_logged_events()
 		self.misc_api_log_write(self.eac_object.api_url_holder + "\n")
 		
-		# temp lists for each report type
-		# will hold all exisiting report events
-		temp_checkin = []
-		temp_result = []
-		temp_task = []
+		# temp lists for events
+		temp_events = []
 		
 		for item in response['reporting']:
 			
-			for key,value in item.iteritems():
-				
-				if key == "event_type":
-		
-					# append to temp list based on type; 3 options
-					if value == "checkin":
-						temp_checkin.append(item)
-						
-					elif value == "result":
-						temp_result.append(item)
-					
-					elif value == "task":
-						temp_task.append(item)
+			temp_events.append(item)
 						
 		# infinite loop
 		while True:
@@ -2940,40 +2780,18 @@ class vader:
 			response = self.eac_object.reporting_get_all_logged_events()
 			
 			for item in response['reporting']:
-			
-				for key,value in item.iteritems():
 				
-					if key == "event_type":
+				if item not in temp_events:
 					
-						# check for new events based on type
-						# if not original event, add to queue display
-					
-						if value == "checkin":
-							
-							if item not in temp_checkin:
-								temp_checkin.append(item)
-								q.put(item)
-								break
-						
-						elif value == "result":
-							
-							if item not in temp_result:
-								temp_result.append(item)
-								q.put(item)
-								break
-					
-						elif value == "task":
-							if item not in temp_task:
-								temp_task.append(item)
-								q.put(item)
-								break
+					q.put(item)
+					temp_events.append(item)
+			
 			# loop control
 			time.sleep(1)
 		
 	###### START APPLICATION #######	
 	def start_application(self):
 		self.form.mainloop() 
-
 		
 if __name__ == '__main__':
 	

@@ -12,4 +12,4 @@ Support for Empire RESTful API for Empire version 2.5.
 
 2. Start the GUI:
 
-/opt/empireGUI: # python Vader.py
+/opt/empireGUI: # python vader.py

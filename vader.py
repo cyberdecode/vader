@@ -571,15 +571,14 @@ class vader:
 		reporting_request_button.config(fg='white',bg='blue',font=('arial','10','bold'))
 		reporting_request_button.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
 		
-		
 		cols = [ "EventType", "TimeStamp", "TaskID", "AgentName", "Message", "ID" ]
 
-		self.reporting_tree = ttk.Treeview(self.reporting_output_lframe, columns=cols, show="headings",height="20")
+		self.reporting_tree = ttk.Treeview(self.reporting_output_lframe, columns=cols, show="headings",height="23")
 		self.reporting_tree.bind("<Double-1>", self.misc_reporting_display_event_details)
 		
 		for c in cols:
 			self.reporting_tree.heading(c, text=str(c), command=lambda x=c: self.misc_col_sort(self.reporting_tree, x, 0) )
-			self.reporting_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 25))
+			self.reporting_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 28))
 		
 		self.reporting_tree.grid(row=1,column=0,padx=5,pady=5)
 	
@@ -597,19 +596,19 @@ class vader:
 		
 		# label info
 		self.creds_label_info = Label(self.creds_output_lframe,text="* Double-click Credential row to view details in separate window.")
-		self.creds_label_info.grid(row=1,column=0,padx=5,pady=5,sticky=NW)
+		self.creds_label_info.grid(row=0,column=1,padx=5,pady=5,sticky=W)
 		
 		# build creds treeview
 		cols = [ "ID", "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
 		
-		self.creds_tree = ttk.Treeview(self.creds_output_lframe, columns=cols, show="headings",height="18")
+		self.creds_tree = ttk.Treeview(self.creds_output_lframe, columns=cols, show="headings",height="23")
 		self.creds_tree.bind("<Double-1>", self.misc_creds_display_event_details)
 		
 		for c in cols:
 			self.creds_tree.heading(c, text=str(c), command=lambda x=c: self.misc_col_sort(self.creds_tree, x, 0))
 			self.creds_tree.column(c, width=tkFont.Font().measure(c.title() + " " * 18))
 		
-		self.creds_tree.grid(row=2,column=0,padx=2,pady=2)
+		self.creds_tree.grid(row=1,column=0,padx=2,pady=2,columnspan=20)
 		
 	####### ADMIN FUNCTIONS ###########
 	
@@ -2469,9 +2468,7 @@ class vader:
 					
 						if key == "ID":
 					
-					
-					
-						holder += (str(value),)
+							holder += (str(value),)
 						
 					# add to reporting tree
 					self.creds_tree.insert('','end',values=holder)

@@ -599,7 +599,7 @@ class vader:
 		self.creds_label_info.grid(row=0,column=1,padx=5,pady=5,sticky=W)
 		
 		# build creds treeview
-		cols = [ "ID", "UserName", "Domain", "CredType", "Notes", "Host", "SID", "Password", "OS" ]
+		cols = [ "username", "domain", "credtype", "notes", "host", "sid", "password", "os", "id" ]
 		
 		self.creds_tree = ttk.Treeview(self.creds_output_lframe, columns=cols, show="headings",height="23")
 		self.creds_tree.bind("<Double-1>", self.misc_creds_display_event_details)
@@ -2465,10 +2465,8 @@ class vader:
 					holder = ()
 					
 					for key,value in item.iteritems():
-					
-						if key == "ID":
-					
-							holder += (str(value),)
+										
+						holder += (str(value),)
 						
 					# add to reporting tree
 					self.creds_tree.insert('','end',values=holder)

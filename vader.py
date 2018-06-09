@@ -16,6 +16,7 @@ import ast
 from ast import *
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import os
 
 # task all shell command class POPUP
 class api_task_all_agents_run_shell_popup:
@@ -204,7 +205,7 @@ class vader:
 		
 		# define the main form - super parent
 		self.form = Tkinter.Tk()
-		self.form.wm_title(' Vader.py - v1.0.3.2018 ')
+		self.form.wm_title(' Vader.py ')
 		self.form.resizable(0,0)
 		
 		###### ACTION TABS FRAME #######
@@ -335,16 +336,17 @@ class vader:
 		self.api_port_field.grid(row=3,column=1,sticky=W,padx=5,pady=5) 
 		# ------- Port Entry Field ------------ #
 		
-		# Get Session Token
-		self.api_action_get_session_button = Tkinter.Button(self.api_connection_lframe,text="Access the Empire",command=self.api_get_session)
-		self.api_action_get_session_button.config(fg='white',bg='blue',font=('arial','10','bold'))
-		self.api_action_get_session_button.grid(row=3,column=2,sticky=W,padx=5,pady=5)
 				
 		##### CONNECTION INFO FRAME ##############
 		
 		##### API BUTTON FRAME ##############
 		self.api_action_lframe = Tkinter.LabelFrame(self.admin_api)
 		self.api_action_lframe.grid(row=0,column=1,padx=10,pady=5,sticky=NW)
+		
+		# Get Session Token
+		self.api_action_get_session_button = Tkinter.Button(self.api_action_lframe,text="Access the Empire",command=self.api_get_session)
+		self.api_action_get_session_button.config(fg='white',bg='blue',font=('arial','10','bold'))
+		self.api_action_get_session_button.grid(row=0,column=0,sticky=W,padx=5,pady=5)
 		
 		# Get Permanent Session Token
 		self.api_action_get_perm_session_button = Tkinter.Button(self.api_action_lframe,text="Get Permanent Token",command=self.api_get_perm_session)
@@ -367,7 +369,7 @@ class vader:
 		self.api_config_lframe = Tkinter.LabelFrame(self.admin_api)
 		self.api_config_lframe.grid(row=1,column=0,columnspan=2,padx=10,pady=5,sticky=NW)
 		
-		self.api_config_textbox = ScrolledText(self.api_config_lframe,width=75,height=12)
+		self.api_config_textbox = ScrolledText(self.api_config_lframe,width=64,height=12)
 		self.api_config_textbox.config(bg='ghost white',state="disabled")
 		self.api_config_textbox.grid(row=0,column=0,sticky='W',columnspan=2)
 		
@@ -386,6 +388,17 @@ class vader:
 		self.api_request_token_field = Tkinter.Entry(self.api_config_lframe,textvariable=self.api_request_token_str,width=45)
 		self.api_request_token_field.grid(row=1,column=1,sticky=W)
 		self.api_request_token_field.config(state="readonly") 
+		
+		##### XTERM WINDOW #########
+		
+		self.api_xterm_lframe = Tkinter.LabelFrame(self.admin_api)
+		self.api_xterm_lframe.grid(row=0,column=2,padx=10,pady=5,sticky=NW,rowspan=15)
+		
+		termf = Frame(self.api_xterm_lframe, height=550, width=700)
+		
+		termf.grid(row=0,column=0,sticky=NSEW)
+		wid = termf.winfo_id()
+		os.system('xterm -into %d -geometry 80x30 -sb -fa "Monospace" -fs 11 -fg black -bg gray &' % wid)
 				
 	# LISTENERS Tab 
 	def build_listeners_tab(self):
@@ -416,7 +429,7 @@ class vader:
 		self.listener_type_treeview.grid(row=0,column=0,sticky=NW,padx=5,pady=5)
 		
 		###### List ALL LISTENERS ############
-		self.listener_all_treeview = ttk.Treeview(self.listener_options_lframe,height=7)
+		self.listener_all_treeview = ttk.Treeview(self.listener_options_lframe,height=12)
 		self.listener_all_treeview.heading("#0",text="     Current Listeners:     ")
 		self.listener_all_treeview.column("#0",minwidth="0",width="250")
 		
@@ -451,7 +464,7 @@ class vader:
 		self.stagers_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 	
 		###### List ALL STAGERS ############
-		self.stagers_all_treeview = ttk.Treeview(self.stagers_options_lframe,height=18)
+		self.stagers_all_treeview = ttk.Treeview(self.stagers_options_lframe,height=25)
 		self.stagers_all_treeview.heading("#0",text="     Stagers:     ")
 		self.stagers_all_treeview.column("#0",minwidth="0",width="250")
 
@@ -480,7 +493,7 @@ class vader:
 		self.agents_current_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW)
 		
 		###### List CURRENT AGENTS ############
-		self.agents_current_treeview = ttk.Treeview(self.agents_current_options_lframe,height=8)
+		self.agents_current_treeview = ttk.Treeview(self.agents_current_options_lframe,height=12)
 		self.agents_current_treeview.heading("#0",text="     Current Agents:     ")
 		
 		# Bind to Action and Grid
@@ -493,7 +506,7 @@ class vader:
 		self.agents_current_refresh_button.grid(row=1,column=0,sticky=N,padx=5,pady=5)
 		
 		###### List STALE AGENTS ############
-		self.agents_stale_treeview = ttk.Treeview(self.agents_current_options_lframe,height=5)
+		self.agents_stale_treeview = ttk.Treeview(self.agents_current_options_lframe,height=10)
 		self.agents_stale_treeview.heading("#0",text="     Stale Agents:     ")
 		self.agents_stale_treeview.grid(row=3,column=0,sticky=NW,padx=5,pady=5)
 		
@@ -515,7 +528,7 @@ class vader:
 		self.modules_options_lframe.grid(row=0,column=0,padx=5,pady=5,sticky=NW,rowspan=2)
 	
 		###### List ALL modules ############
-		self.modules_all_treeview = ttk.Treeview(self.modules_options_lframe,height=20)
+		self.modules_all_treeview = ttk.Treeview(self.modules_options_lframe,height=25)
 		self.modules_all_treeview.heading("#0",text="     Modules:     ")
 		self.modules_all_treeview.column("#0",minwidth="0",width="540")
 
@@ -1724,7 +1737,7 @@ class vader:
 			self.temp_RefreshButton.config(fg='white',bg='slate gray',font=('arial','10','bold'))
 			self.temp_RefreshButton.grid(row=0,column=4,sticky=W,padx=2,pady=2)
 		
-			self.temp_agents_results_scrolledtext = ScrolledText(self.temp_agent_results_labelframe,height=25,width=147)
+			self.temp_agents_results_scrolledtext = ScrolledText(self.temp_agent_results_labelframe,height=21,width=128)
 			self.temp_agents_results_scrolledtext.config(bg='ghost white')
 			self.temp_agents_results_scrolledtext.grid(row=1,column=0,columnspan=50,sticky='NEWS',padx=2,pady=2)
 			self.temp_agents_results_scrolledtext.config(state="disabled")
@@ -2164,7 +2177,7 @@ class vader:
 						self.option_name_dlabel.grid(row=row_count,column=0,sticky=NE,padx=2,pady=2)
 						
 						# Option Field Value
-						self.option_entry_textbox = ScrolledText(self.temp_modules_details_labelframe,width=80,height=3)
+						self.option_entry_textbox = ScrolledText(self.temp_modules_details_labelframe,width=70,height=3)
 						self.option_entry_textbox.config(bg="ghost white",state="disabled")
 						self.option_entry_textbox.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 						
@@ -2216,7 +2229,7 @@ class vader:
 							comments += i + " "
 								
 						# Option Field Value
-						self.option_entry_textbox = ScrolledText(self.temp_modules_details_labelframe,width=80,height=3)
+						self.option_entry_textbox = ScrolledText(self.temp_modules_details_labelframe,width=70,height=3)
 						self.option_entry_textbox.config(bg="ghost white",state="disabled")
 						self.option_entry_textbox.grid(row=row_count,column=1,columnspan=2,sticky=W,padx=2,pady=2)
 						
